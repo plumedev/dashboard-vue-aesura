@@ -3,9 +3,12 @@ import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import type { NavigationMenuItem } from '@nuxt/ui'
+import RouteName from '@/router/RouteName'
 
 const toast = useToast()
 const route = useRoute()
+
+const isLoginPage = computed(() => route.name === RouteName.LOGIN)
 
 const open = ref(false)
 
@@ -116,50 +119,55 @@ if (cookie.value !== 'accepted') {
 <template>
   <Suspense>
     <UApp>
-      <UDashboardGroup unit="rem" storage="local">
-        <UDashboardSidebar
-          id="default"
-          v-model:open="open"
-          collapsible
-          resizable
-          class="bg-elevated/25"
-          :ui="{ footer: 'lg:border-t lg:border-default' }"
-        >
-          <template #header="{ collapsed }">
-            <TeamsMenu :collapsed="collapsed" />
-          </template>
-
-          <template #default="{ collapsed }">
-            <UDashboardSearchButton :collapsed="collapsed" class="bg-transparent ring-default" />
-
-            <UNavigationMenu
-              :collapsed="collapsed"
-              :items="links[0]"
-              orientation="vertical"
-              tooltip
-              popover
-            />
-
-            <UNavigationMenu
-              :collapsed="collapsed"
-              :items="links[1]"
-              orientation="vertical"
-              tooltip
-              class="mt-auto"
-            />
-          </template>
-
-          <template #footer="{ collapsed }">
-            <UserMenu :collapsed="collapsed" />
-          </template>
-        </UDashboardSidebar>
-
-        <UDashboardSearch :groups="groups" />
-
+      <template v-if="isLoginPage">
         <RouterView />
+      </template>
+      <template v-else>
+        <UDashboardGroup unit="rem" storage="local">
+          <UDashboardSidebar
+            id="default"
+            v-model:open="open"
+            collapsible
+            resizable
+            class="bg-elevated/25"
+            :ui="{ footer: 'lg:border-t lg:border-default' }"
+          >
+            <template #header="{ collapsed }">
+              <TeamsMenu :collapsed="collapsed" />
+            </template>
 
-        <NotificationsSlideover />
-      </UDashboardGroup>
+            <template #default="{ collapsed }">
+              <UDashboardSearchButton :collapsed="collapsed" class="bg-transparent ring-default" />
+
+              <UNavigationMenu
+                :collapsed="collapsed"
+                :items="links[0]"
+                orientation="vertical"
+                tooltip
+                popover
+              />
+
+              <UNavigationMenu
+                :collapsed="collapsed"
+                :items="links[1]"
+                orientation="vertical"
+                tooltip
+                class="mt-auto"
+              />
+            </template>
+
+            <template #footer="{ collapsed }">
+              <UserMenu :collapsed="collapsed" />
+            </template>
+          </UDashboardSidebar>
+
+          <UDashboardSearch :groups="groups" />
+
+          <RouterView />
+
+          <NotificationsSlideover />
+        </UDashboardGroup>
+      </template>
     </UApp>
   </Suspense>
 </template>

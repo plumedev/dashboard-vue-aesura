@@ -3,7 +3,7 @@ import {
   GoogleAuthProvider,
   signOut as firebaseSignOut,
   type User,
-  type UserCredential
+  type UserCredential,
 } from 'firebase/auth'
 import { getAuthInstance } from '@/config/firebase'
 import { useAuthStore } from '@/stores/authStore'
@@ -23,18 +23,22 @@ export function useAuth() {
 
       addToast({
         title: 'Connexion réussie !',
-        color: 'success'
+        color: 'success',
       })
       return userCredential
     } catch (error: unknown) {
       if (error instanceof Error) {
         let errorMessage = 'Erreur de connexion'
-        const errorCode = (error as any).code || ''
+        const errorCode = (error as { code?: string }).code || ''
 
-        if (errorCode === 'auth/popup-closed-by-user' || error.message.includes('popup-closed-by-user')) {
+        if (
+          errorCode === 'auth/popup-closed-by-user' ||
+          error.message.includes('popup-closed-by-user')
+        ) {
           errorMessage = 'La fenêtre de connexion a été fermée'
         } else if (errorCode === 'auth/popup-blocked' || error.message.includes('popup-blocked')) {
-          errorMessage = 'La fenêtre popup a été bloquée. Veuillez autoriser les popups pour ce site.'
+          errorMessage =
+            'La fenêtre popup a été bloquée. Veuillez autoriser les popups pour ce site.'
         } else if (errorCode === 'auth/unauthorized-domain') {
           errorMessage = "Ce domaine n'est pas autorisé pour l'authentification Google"
         } else {
@@ -43,7 +47,7 @@ export function useAuth() {
 
         addToast({
           title: errorMessage,
-          color: 'error'
+          color: 'error',
         })
       }
       throw error
@@ -58,13 +62,13 @@ export function useAuth() {
 
       addToast({
         title: 'Déconnexion réussie',
-        color: 'success'
+        color: 'success',
       })
     } catch (error: unknown) {
       if (error instanceof Error) {
         addToast({
           title: `Erreur de déconnexion: ${error.message}`,
-          color: 'error'
+          color: 'error',
         })
       }
 
@@ -79,6 +83,6 @@ export function useAuth() {
   return {
     signInWithGoogle,
     signOut,
-    getCurrentUser
+    getCurrentUser,
   }
 }

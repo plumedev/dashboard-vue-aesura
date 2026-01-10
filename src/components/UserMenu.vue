@@ -1,25 +1,54 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { useColorMode } from '@vueuse/core'
+import { useAuth } from '@/composables/firebase/useAuth'
+import { useAuthStore } from '@/stores/authStore'
+import RouteName from '@/router/RouteName'
 
 defineProps<{
   collapsed?: boolean
 }>()
 
+const router = useRouter()
 const colorMode = useColorMode()
 const appConfig = useAppConfig()
+const { signOut } = useAuth()
+const authStore = useAuthStore()
 
 const colors = ['red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose']
 const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone']
 
-const user = ref({
-  name: 'Benjamin Canac',
-  avatar: {
-    src: 'https://github.com/benjamincanac.png',
-    alt: 'Benjamin Canac'
+const user = computed(() => {
+  const firebaseUser = authStore.user
+  if (firebaseUser) {
+    return {
+      name: firebaseUser.displayName || firebaseUser.email || 'User',
+      avatar: {
+        src: firebaseUser.photoURL || undefined,
+        alt: firebaseUser.displayName || firebaseUser.email || 'User'
+      }
+    }
+  }
+  return {
+    name: 'User',
+    avatar: {
+      src: undefined,
+      alt: 'User'
+    }
   }
 })
+
+const handleLogout = async () => {
+  try {
+    await signOut()
+    router.push({ name: RouteName.LOGIN })
+  } catch (error) {
+    // L'erreur est déjà gérée dans useAuth avec un toast
+    console.error('Erreur lors de la déconnexion:', error)
+  }
+}
 
 const items = computed<DropdownMenuItem[][]>(() => ([[{
   type: 'label',
@@ -131,7 +160,8 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
   target: '_blank'
 }], [{
   label: 'Log out',
-  icon: 'i-lucide-log-out'
+  icon: 'i-lucide-log-out',
+  onSelect: handleLogout
 }]]))
 </script>
 
