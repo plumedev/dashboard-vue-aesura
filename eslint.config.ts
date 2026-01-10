@@ -10,13 +10,37 @@ export default ts.config(
     files: ['*.vue', '**/*.vue'],
     languageOptions: {
       parserOptions: {
-        parser: '@typescript-eslint/parser'
-      }
+        parser: '@typescript-eslint/parser',
+      },
     },
     rules: {
       'vue/multi-word-component-names': 'off',
-      'vue/max-attributes-per-line': ['error', { singleline: 3 }],
-      'no-undef': 'off'
-    }
+      'vue/max-attributes-per-line': [
+        'error',
+        {
+          singleline: {
+            max: 3,
+          },
+          multiline: {
+            max: 1,
+          },
+        },
+      ],
+      'vue/first-attribute-linebreak': [
+        'error',
+        {
+          singleline: 'ignore',
+          multiline: 'below',
+        },
+      ],
+      'vue/html-closing-bracket-newline': [
+        'error',
+        {
+          singleline: 'never',
+          multiline: 'always',
+        },
+      ],
+      'no-undef': 'off',
+    },
   }
 )

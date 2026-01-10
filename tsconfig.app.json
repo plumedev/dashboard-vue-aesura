@@ -22,8 +22,15 @@
 
     /* Paths */
     "paths": {
+      "@/*": ["./src/*"],
       "#build/ui/*": ["./node_modules/.nuxt-ui/ui/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "auto-imports.d.ts", "components.d.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "auto-imports.d.ts",
+    "components.d.ts"
+  ]
 }

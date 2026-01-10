@@ -2,11 +2,15 @@ import './assets/css/main.css'
 
 import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
+import { createPinia } from 'pinia'
 import ui from '@nuxt/ui/vue-plugin'
 
 import App from './App.vue'
 
 const app = createApp(App)
+const pinia = createPinia()
+
+app.use(pinia)
 
 app.use(createRouter({
   routes: [
