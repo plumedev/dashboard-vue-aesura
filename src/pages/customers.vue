@@ -214,6 +214,7 @@ const pagination = ref({
         </template>
 
         <template #right>
+          PLOP
           <CustomersAddModal />
         </template>
       </UDashboardNavbar>

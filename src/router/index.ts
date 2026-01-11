@@ -29,21 +29,11 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/inbox',
-    name: RouteName.INBOX,
-    component: () => import('../pages/inbox.vue'),
+    path: '/my-month',
+    name: RouteName.MY_MONTH,
+    component: () => import('../pages/myMonth.vue'),
     meta: {
-      title: 'Inbox',
-      requiresAuth: true,
-      icon: 'i-lucide-inbox',
-    },
-  },
-  {
-    path: '/customers',
-    name: RouteName.CUSTOMERS,
-    component: () => import('../pages/customers.vue'),
-    meta: {
-      title: 'Customers',
+      title: 'My month',
       requiresAuth: true,
       icon: 'i-lucide-users',
     },
@@ -68,15 +58,6 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
-        path: 'members',
-        name: RouteName.SETTINGS_MEMBERS,
-        component: () => import('../pages/settings/members.vue'),
-        meta: {
-          title: 'Members',
-          requiresAuth: true,
-        },
-      },
-      {
         path: 'notifications',
         name: RouteName.SETTINGS_NOTIFICATIONS,
         component: () => import('../pages/settings/notifications.vue'),
@@ -95,6 +76,15 @@ const routes: RouteRecordRaw[] = [
         },
       },
     ],
+  },
+  {
+    path: '/new-transaction',
+    name: RouteName.NEW_TRANSACTION,
+    component: () => import('../pages/newTransactions/newTransactionView.vue'),
+    meta: {
+      title: 'Nouvelle transaction',
+      requiresAuth: true,
+    },
   },
 ]
 

@@ -1,3 +1,5 @@
+import { Timestamp } from 'firebase/firestore'
+
 /**
  * Convertit une date au format ISO "2026-01-30" (YYYY-MM-DD)
  * en objet Date JavaScript dans le fuseau horaire local.
@@ -25,4 +27,21 @@ export function parseDate(dateString: string): Date {
   // Créer la date dans le fuseau horaire local (minuit local)
   // Note: month - 1 car les mois sont indexés de 0 à 11 en JavaScript
   return new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10))
+}
+
+/**
+ * Convertit une date (string ISO ou Date) en Timestamp Firebase.
+ *
+ * @param date - La date à convertir (string ISO ou Date)
+ * @param isEndDate - Si true, ajoute 1 jour pour la date de fin
+ * @returns Un Timestamp Firebase
+ */
+export function toFirestoreTimestamp(date: string | Date, isEndDate = false): Timestamp {
+  const adjustedDate = new Date(date)
+
+  if (isEndDate) {
+    adjustedDate.setDate(adjustedDate.getDate() + 1)
+  }
+
+  return Timestamp.fromDate(adjustedDate)
 }

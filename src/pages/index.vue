@@ -1,29 +1,3 @@
-<script setup lang="ts">
-import { ref, shallowRef } from 'vue'
-import { sub } from 'date-fns'
-import type { DropdownMenuItem } from '@nuxt/ui'
-import { useDashboard } from '../composables/useDashboard'
-import type { Period, Range } from '../types'
-
-const { isNotificationsSlideoverOpen } = useDashboard()
-
-const items = [[{
-  label: 'New mail',
-  icon: 'i-lucide-send',
-  to: '/inbox'
-}, {
-  label: 'New customer',
-  icon: 'i-lucide-user-plus',
-  to: '/customers'
-}]] satisfies DropdownMenuItem[][]
-
-const range = shallowRef<Range>({
-  start: sub(new Date(), { days: 14 }),
-  end: new Date()
-})
-const period = ref<Period>('daily')
-</script>
-
 <template>
   <UDashboardPanel id="home">
     <template #header>
@@ -33,19 +7,6 @@ const period = ref<Period>('daily')
         </template>
 
         <template #right>
-          <UTooltip text="Notifications" :shortcuts="['N']">
-            <UButton
-              color="neutral"
-              variant="ghost"
-              square
-              @click="isNotificationsSlideoverOpen = true"
-            >
-              <UChip color="error" inset>
-                <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
-              </UChip>
-            </UButton>
-          </UTooltip>
-
           <UDropdownMenu :items="items">
             <UButton icon="i-lucide-plus" size="md" class="rounded-full" />
           </UDropdownMenu>
@@ -63,9 +24,46 @@ const period = ref<Period>('daily')
     </template>
 
     <template #body>
-      <HomeStats :period="period" :range="range" />
+      <HomeStats :transactions="transactions" />
       <HomeChart :period="period" :range="range" />
       <HomeSales :period="period" :range="range" />
+      {{ transactions?.length }}
+      <pre>{{ transactions }}</pre>
     </template>
   </UDashboardPanel>
 </template>
+
+<script setup lang="ts">
+import { onMounted, ref, shallowRef, watch } from 'vue'
+import { sub } from 'date-fns'
+import type { DropdownMenuItem } from '@nuxt/ui'
+import type { Period, Range } from '../types'
+import { useGetTransactionByPeriod } from '@/composables/firebase/dedicated/useGetTransactionByPeriod'
+import { DocumentData } from 'firebase/firestore'
+
+const { doRequest: getTransactions } = useGetTransactionByPeriod()
+
+const transactions = ref<DocumentData[]>([])
+const items = [[{
+  label: 'Nouvelle transaction',
+  icon: 'i-lucide-banknote-arrow-up',
+  to: '/new-transaction'
+}]] satisfies DropdownMenuItem[][]
+
+const range = shallowRef<Range>({
+  start: sub(new Date(), { days: 14 }),
+  end: new Date()
+})
+const period = ref<Period>('daily')
+
+
+
+onMounted(async () => {
+  transactions.value = await getTransactions({ dateRange: { start: range.value.start, end: range.value.end } })
+})
+
+watch(range, async (newRange) => {
+  transactions.value = await getTransactions({ dateRange: { start: newRange.start, end: newRange.end } })
+}, { deep: true })
+</script>
+

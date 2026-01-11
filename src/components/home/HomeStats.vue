@@ -19,74 +19,58 @@
         <span class="text-2xl font-semibold text-highlighted">
           {{ stat.value }}
         </span>
-
-        <UBadge
-          :color="stat.variation > 0 ? 'success' : 'error'"
-          variant="subtle"
-          class="text-xs"
-        >
-          {{ stat.variation > 0 ? '+' : '' }}{{ stat.variation }}%
-        </UBadge>
       </div>
     </UPageCard>
   </UPageGrid>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { randomInt } from '../../utils'
-import type { Period, Range, Stat } from '../../types'
+import { computed } from 'vue';
+import type { DocumentData } from 'firebase/firestore';
+
 
 const props = defineProps<{
-  period: Period
-  range: Range
+  transactions: DocumentData[]
 }>()
 
-function formatCurrency(value: number): string {
-  return value.toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0
-  })
-}
-
-const baseStats = [ {
-  title: 'Dépenses',
-  icon: 'i-lucide-banknote-arrow-down',
-  minValue: 1000,
-  maxValue: 2000,
-  minVariation: -10,
-  maxVariation: 20
-}, {
-  title: 'Revenus',
-  icon: 'i-lucide-banknote-arrow-up',
-  minValue: 200000,
-  maxValue: 500000,
-  minVariation: -20,
-  maxVariation: 30,
-  formatter: formatCurrency
-}, {
-  title: 'Orders',
-  icon: 'i-lucide-shopping-cart',
-  minValue: 100,
-  maxValue: 300,
-  minVariation: -5,
-  maxVariation: 15
-}]
-
-const stats = ref<Stat[]>([])
-
-watch([() => props.period, () => props.range], () => {
-  stats.value = baseStats.map((stat) => {
-    const value = randomInt(stat.minValue, stat.maxValue)
-    const variation = randomInt(stat.minVariation, stat.maxVariation)
-
-    return {
-      title: stat.title,
-      icon: stat.icon,
-      value: stat.formatter ? stat.formatter(value) : value,
-      variation
+const expensesAmount = computed(() => {
+  return props.transactions?.reduce((acc: number, transaction: DocumentData) => {
+    if (transaction.type === 'expense') {
+      return acc + Number(transaction.amount)
     }
-  })
-}, { immediate: true })
+    return acc
+  }, 0) ?? 0
+})
+
+const incomesAmount = computed(() => {
+  return props.transactions?.reduce((acc: number, transaction: DocumentData) => {
+    if (transaction.type === 'income') {
+      return acc + Number(transaction.amount)
+    }
+    return acc
+  }, 0) ?? 0
+})
+
+const balanceAmount = computed(() => {
+  return incomesAmount.value - expensesAmount.value
+})
+
+const stats = computed(() => [
+  {
+    title: 'Expenses',
+    icon: 'i-lucide-arrow-down-left',
+    value: expensesAmount.value
+  },
+  {
+    title: 'Incomes',
+    icon: 'i-lucide-arrow-up-right',
+    value: incomesAmount.value
+  },
+  {
+    title: 'Balance',
+    icon: 'i-lucide-arrow-up-right',
+    value: balanceAmount.value
+  }
+])
+
 </script>

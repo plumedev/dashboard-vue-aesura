@@ -10,12 +10,13 @@ const df = new DateFormatter('en-US', {
 const selected = defineModel<Range>({ required: true })
 
 const ranges = [
-  { label: 'Last 7 days', days: 7 },
-  { label: 'Last 14 days', days: 14 },
-  { label: 'Last 30 days', days: 30 },
-  { label: 'Last 3 months', months: 3 },
-  { label: 'Last 6 months', months: 6 },
-  { label: 'Last year', years: 1 }
+  { label: 'Ce mois-ci', currentMonth: true },
+  { label: '7 derniers jours', days: 7 },
+  { label: '14 derniers jours', days: 14 },
+  { label: '30 derniers jours', days: 30 },
+  { label: '3 derniers mois', months: 3 },
+  { label: '6 derniers mois', months: 6 },
+  { label: '1 an', years: 1 }
 ]
 
 const toCalendarDate = (date: Date) => {
@@ -39,36 +40,56 @@ const calendarRange = computed({
   }
 })
 
-const isRangeSelected = (range: { days?: number, months?: number, years?: number }) => {
+const isRangeSelected = (range: { days?: number, months?: number, years?: number, currentMonth?: boolean }) => {
   if (!selected.value.start || !selected.value.end) return false
 
   const currentDate = today(getLocalTimeZone())
-  let startDate = currentDate.copy()
+  let startDate: CalendarDate
+  let endDate: CalendarDate
 
-  if (range.days) {
-    startDate = startDate.subtract({ days: range.days })
-  } else if (range.months) {
-    startDate = startDate.subtract({ months: range.months })
-  } else if (range.years) {
-    startDate = startDate.subtract({ years: range.years })
+  if (range.currentMonth) {
+
+    startDate = new CalendarDate(currentDate.year, currentDate.month, 1)
+
+    endDate = new CalendarDate(currentDate.year, currentDate.month, currentDate.calendar.getDaysInMonth(currentDate))
+  } else {
+    endDate = currentDate.copy()
+    startDate = endDate.copy()
+    if (range.days) {
+      startDate = startDate.subtract({ days: range.days })
+    } else if (range.months) {
+      startDate = startDate.subtract({ months: range.months })
+    } else if (range.years) {
+      startDate = startDate.subtract({ years: range.years })
+    }
   }
 
   const selectedStart = toCalendarDate(selected.value.start)
   const selectedEnd = toCalendarDate(selected.value.end)
 
-  return selectedStart.compare(startDate) === 0 && selectedEnd.compare(currentDate) === 0
+  return selectedStart.compare(startDate) === 0 && selectedEnd.compare(endDate) === 0
 }
 
-const selectRange = (range: { days?: number, months?: number, years?: number }) => {
-  const endDate = today(getLocalTimeZone())
-  let startDate = endDate.copy()
+const selectRange = (range: { days?: number, months?: number, years?: number, currentMonth?: boolean }) => {
+  const currentDate = today(getLocalTimeZone())
+  let startDate: CalendarDate
+  let endDate: CalendarDate
 
-  if (range.days) {
-    startDate = startDate.subtract({ days: range.days })
-  } else if (range.months) {
-    startDate = startDate.subtract({ months: range.months })
-  } else if (range.years) {
-    startDate = startDate.subtract({ years: range.years })
+  if (range.currentMonth) {
+
+    startDate = new CalendarDate(currentDate.year, currentDate.month, 1)
+
+    endDate = new CalendarDate(currentDate.year, currentDate.month, currentDate.calendar.getDaysInMonth(currentDate))
+  } else {
+    endDate = currentDate.copy()
+    startDate = endDate.copy()
+    if (range.days) {
+      startDate = startDate.subtract({ days: range.days })
+    } else if (range.months) {
+      startDate = startDate.subtract({ months: range.months })
+    } else if (range.years) {
+      startDate = startDate.subtract({ years: range.years })
+    }
   }
 
   selected.value = {
