@@ -9,12 +9,10 @@ import { Timestamp } from 'firebase/firestore'
  * @throws {Error} Si le format de date n'est pas reconnu
  */
 export function parseDate(dateString: string): Date {
-  // Pattern: "2026-01-30"
   const pattern = /^(\d{4})-(\d{2})-(\d{2})$/
   const match = dateString.match(pattern)
 
   if (!match) {
-    // Si le format ne correspond pas, essaie de parser avec Date() natif
     const parsed = new Date(dateString)
     if (isNaN(parsed.getTime())) {
       throw new Error(`Format de date non reconnu: ${dateString}`)
@@ -24,8 +22,6 @@ export function parseDate(dateString: string): Date {
 
   const [, year, month, day] = match
 
-  // Créer la date dans le fuseau horaire local (minuit local)
-  // Note: month - 1 car les mois sont indexés de 0 à 11 en JavaScript
   return new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10))
 }
 
@@ -44,4 +40,56 @@ export function toFirestoreTimestamp(date: string | Date, isEndDate = false): Ti
   }
 
   return Timestamp.fromDate(adjustedDate)
+}
+
+/**
+ * Convertit une date (Timestamp Firestore, string ou Date) en Date JavaScript.
+ * Gère les cas où la date est null ou undefined en retournant la date actuelle.
+ * Pour les strings au format "YYYY-MM-DD", utilise parseDate pour éviter les problèmes de fuseau horaire.
+ *
+ * @param date - La date à convertir (Timestamp, string, Date, null ou undefined)
+ * @returns Un objet Date JavaScript
+ */
+export function toDate(date: Date | Timestamp | string | null | undefined): Date {
+  if (!date) {
+    return new Date()
+  }
+
+  if (date instanceof Date) {
+    return date
+  }
+
+  if (date instanceof Timestamp) {
+    return date.toDate()
+  }
+
+  if (typeof date === 'string') {
+    const yyyyMmDdPattern = /^(\d{4})-(\d{2})-(\d{2})$/
+    if (yyyyMmDdPattern.test(date)) {
+      try {
+        return parseDate(date)
+      } catch {
+        return new Date(date)
+      }
+    }
+    return new Date(date)
+  }
+
+  return new Date()
+}
+
+/**
+ * Formate une date en français avec date et heure.
+ *
+ * @param date - La date à formater (Timestamp, string, Date, null ou undefined)
+ * @returns Une chaîne formatée en français (ex: "15 janv. 2026, 11:00")
+ */
+export function formatDate(date: Date | Timestamp | string | null | undefined): string {
+  const dateObj = toDate(date)
+
+  return dateObj.toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
 }

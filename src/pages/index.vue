@@ -24,11 +24,18 @@
     </template>
 
     <template #body>
-      <HomeStats :transactions="transactions" />
-      <HomeChart :period="period" :range="range" />
-      <HomeSales :period="period" :range="range" />
-      {{ transactions?.length }}
-      <pre>{{ transactions }}</pre>
+      <div class="flex flex-col h-full min-h-0">
+        <HomeStats :transactions="transactions" />
+        <HomeChart :period="period" :range="range" />
+        <HomeTransactionsTable
+          :period="period"
+          :range="range"
+          :transactions="transactions"
+          :is-loading="isLoadingTransactions"
+        />
+        <!-- {{ transactions?.length }}
+        <pre>{{ transactions }}</pre> -->
+      </div>
     </template>
   </UDashboardPanel>
 </template>
@@ -41,7 +48,7 @@ import type { Period, Range } from '../types'
 import { useGetTransactionByPeriod } from '@/composables/firebase/dedicated/useGetTransactionByPeriod'
 import { DocumentData } from 'firebase/firestore'
 
-const { doRequest: getTransactions } = useGetTransactionByPeriod()
+const { isLoading: isLoadingTransactions, doRequest: getTransactions } = useGetTransactionByPeriod()
 
 const transactions = ref<DocumentData[]>([])
 const items = [[{

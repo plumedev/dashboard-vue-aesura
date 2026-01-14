@@ -17,7 +17,7 @@
     >
       <div class="flex items-center gap-2">
         <span class="text-2xl font-semibold text-highlighted">
-          {{ stat.value }}
+          {{ formatMoney(stat.value) }}
         </span>
       </div>
     </UPageCard>
@@ -27,47 +27,45 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { DocumentData } from 'firebase/firestore';
-
+import { formatMoney, safeAdd, safeSubtract } from '@/helpers/moneyHelpers'
 
 const props = defineProps<{
   transactions: DocumentData[]
 }>()
 
 const expensesAmount = computed(() => {
-  return props.transactions?.reduce((acc: number, transaction: DocumentData) => {
-    if (transaction.type === 'expense') {
-      return acc + Number(transaction.amount)
-    }
-    return acc
-  }, 0) ?? 0
+  const amounts = props.transactions
+    ?.filter((transaction: DocumentData) => transaction.type === 'expense')
+    .map((transaction: DocumentData) => transaction.amount) || []
+
+  return safeAdd(amounts)
 })
 
 const incomesAmount = computed(() => {
-  return props.transactions?.reduce((acc: number, transaction: DocumentData) => {
-    if (transaction.type === 'income') {
-      return acc + Number(transaction.amount)
-    }
-    return acc
-  }, 0) ?? 0
+  const amounts = props.transactions
+    ?.filter((transaction: DocumentData) => transaction.type === 'income')
+    .map((transaction: DocumentData) => transaction.amount) || []
+
+  return safeAdd(amounts)
 })
 
 const balanceAmount = computed(() => {
-  return incomesAmount.value - expensesAmount.value
+  return safeSubtract(incomesAmount.value, expensesAmount.value)
 })
 
 const stats = computed(() => [
   {
-    title: 'Expenses',
+    title: 'Dépenses',
     icon: 'i-lucide-arrow-down-left',
     value: expensesAmount.value
   },
   {
-    title: 'Incomes',
+    title: 'Revenus',
     icon: 'i-lucide-arrow-up-right',
     value: incomesAmount.value
   },
   {
-    title: 'Balance',
+    title: 'Solde',
     icon: 'i-lucide-arrow-up-right',
     value: balanceAmount.value
   }

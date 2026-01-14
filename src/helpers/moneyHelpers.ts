@@ -1,0 +1,76 @@
+import Big from 'big.js'
+
+/**
+ * Helper pour les calculs monétaires précis avec big.js
+ * Résout les problèmes de précision des nombres à virgule flottante JavaScript
+ */
+
+/**
+ * Additionne plusieurs montants monétaires de manière précise
+ *
+ * @param amounts - Tableau de montants (number, string, null ou undefined)
+ * @returns Le total en tant que number
+ *
+ * @example
+ * safeAdd([10.1, 20.2, 30.3]) // 60.6 (au lieu de 60.599999999999994)
+ */
+export function safeAdd(amounts: (number | string | null | undefined)[]): number {
+  return amounts
+    .reduce((sum, amount) => {
+      if (amount === null || amount === undefined) {
+        return sum
+      }
+      // Convertir en Big pour éviter les erreurs de précision
+      return sum.plus(new Big(amount))
+    }, new Big(0))
+    .toNumber()
+}
+
+/**
+ * Soustrait deux montants de manière précise
+ *
+ * @param a - Montant à soustraire de
+ * @param b - Montant à soustraire
+ * @returns La différence en tant que number
+ *
+ * @example
+ * safeSubtract(10.1, 3.2) // 6.9 (au lieu de 6.8999999999999995)
+ */
+export function safeSubtract(a: number | string, b: number | string): number {
+  return new Big(a).minus(new Big(b)).toNumber()
+}
+
+/**
+ * Multiplie deux montants de manière précise
+ *
+ * @param a - Premier montant
+ * @param b - Deuxième montant
+ * @returns Le produit en tant que number
+ */
+export function safeMultiply(a: number | string, b: number | string): number {
+  return new Big(a).times(new Big(b)).toNumber()
+}
+
+/**
+ * Divise deux montants de manière précise
+ *
+ * @param a - Dividende
+ * @param b - Diviseur
+ * @returns Le quotient en tant que number
+ */
+export function safeDivide(a: number | string, b: number | string): number {
+  return new Big(a).div(new Big(b)).toNumber()
+}
+
+/**
+ * Formate un montant en euros avec le formatage français
+ *
+ * @param amount - Le montant à formater
+ * @returns Une chaîne formatée (ex: "1 234,56 €")
+ */
+export function formatMoney(amount: number | string): string {
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(Number(amount))
+}
