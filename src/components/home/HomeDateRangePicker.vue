@@ -1,34 +1,58 @@
 
 <template>
-  <UPopover :content="{ align: 'start' }" :modal="true">
+  <UPopover
+    :content="{ align: 'start' }"
+    :modal="true"
+  >
     <UButton
       color="neutral"
       variant="ghost"
       icon="i-lucide-calendar"
       class="data-[state=open]:bg-elevated group"
     >
-      <span class="truncate">
-        <template v-if="selected.start">
-          <template v-if="selected.end">
+      <span
+        class="truncate"
+      >
+        <template
+          v-if="selected.start"
+        >
+          <template
+            v-if="selected.end"
+          >
             {{ df.format(selected.start) }} - {{ df.format(selected.end) }}
           </template>
-          <template v-else>
+          <template
+            v-else
+          >
             {{ df.format(selected.start) }}
           </template>
         </template>
-        <template v-else>
+        <template
+          v-else
+        >
           Pick a date
         </template>
       </span>
 
-      <template #trailing>
-        <UIcon name="i-lucide-chevron-down" class="shrink-0 text-dimmed size-5 group-data-[state=open]:rotate-180 transition-transform duration-200" />
+      <template
+        #trailing
+      >
+        <UIcon
+          name="i-lucide-chevron-down"
+          class="shrink-0 text-dimmed size-5 group-data-[state=open]:rotate-180 transition-transform duration-200"
+        />
       </template>
     </UButton>
 
-    <template #content>
-      <div class="flex items-stretch sm:divide-x divide-default">
-        <div class="hidden sm:flex flex-col justify-center">
+    <template
+      #content
+    >
+      <div
+        class="flex items-stretch sm:divide-x divide-default"
+      >
+        <div
+          class="hidden sm:flex flex-col justify-center"
+        >
           <UButton
             v-for="(range, index) in ranges"
             :key="index"

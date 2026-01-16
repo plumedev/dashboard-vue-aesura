@@ -1,5 +1,7 @@
 <template>
-  <UPageGrid class="lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-px w-full flex">
+  <UPageGrid
+    class="lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-px w-full flex"
+  >
     <UPageCard
       v-for="(stat, index) in stats"
       :key="index"
@@ -15,8 +17,12 @@
       }"
       class="lg:rounded-none first:rounded-l-lg last:rounded-r-lg hover:z-1 w-full"
     >
-      <div class="flex items-center gap-2">
-        <span class="text-2xl font-semibold text-highlighted">
+      <div
+        class="flex items-center gap-2"
+      >
+        <span
+          class="text-2xl font-semibold text-highlighted"
+        >
           {{ formatMoney(stat.value) }}
         </span>
       </div>

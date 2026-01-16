@@ -48,7 +48,7 @@ const links = [[{
       open.value = false
     }
   }, {
-    label: 'Security',
+    label: 'Sécurité',
     icon: 'i-lucide-shield',
     to: '/settings/security',
     onSelect: () => {
@@ -103,14 +103,8 @@ if (cookie.value !== 'accepted') {
       </template>
       <template v-else>
         <UDashboardGroup unit="rem" storage="local">
-          <UDashboardSidebar
-            id="default"
-            v-model:open="open"
-            collapsible
-            resizable
-            class="bg-elevated/25"
-            :ui="{ footer: 'lg:border-t lg:border-default' }"
-          >
+          <UDashboardSidebar id="default" v-model:open="open" collapsible resizable class="bg-elevated/25"
+            :ui="{ footer: 'lg:border-t lg:border-default' }">
             <template #header="{ collapsed }">
               <AppLogo :collapsed="collapsed" />
             </template>
@@ -118,21 +112,10 @@ if (cookie.value !== 'accepted') {
             <template #default="{ collapsed }">
               <UDashboardSearchButton :collapsed="collapsed" class="bg-transparent ring-default" />
 
-              <UNavigationMenu
-                :collapsed="collapsed"
-                :items="links[0]"
-                orientation="vertical"
-                tooltip
-                popover
-              />
+              <UNavigationMenu :collapsed="collapsed" :items="links[0]" orientation="vertical" tooltip popover />
 
-              <UNavigationMenu
-                :collapsed="collapsed"
-                :items="links[1]"
-                orientation="vertical"
-                tooltip
-                class="mt-auto"
-              />
+              <UNavigationMenu :collapsed="collapsed" :items="links[1]" orientation="vertical" tooltip
+                class="mt-auto" />
             </template>
 
             <template #footer="{ collapsed }">

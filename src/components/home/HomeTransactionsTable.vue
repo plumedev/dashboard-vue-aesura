@@ -1,5 +1,7 @@
 <template>
-  <div class="flex-1 flex flex-col min-h-0 mt-5">
+  <div
+    class="flex-1 flex flex-col min-h-0 mt-5"
+  >
     <UTable
       sticky
       loading-animation="carousel"

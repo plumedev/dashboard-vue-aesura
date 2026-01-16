@@ -1,16 +1,28 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-neutral-900">
-    <UCard class="w-full max-w-md m-4 border-none">
-      <template #header>
-        <h2 class="text-2xl font-bold text-center">
+  <div
+    class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-neutral-900"
+  >
+    <UCard
+      class="w-full max-w-md m-4 border-none"
+    >
+      <template
+        #header
+      >
+        <h2
+          class="text-2xl font-bold text-center"
+        >
           Connexion
         </h2>
-        <p class="text-sm text-gray-500 dark:text-gray-400 text-center mt-2">
+        <p
+          class="text-sm text-gray-500 dark:text-gray-400 text-center mt-2"
+        >
           Connectez-vous avec votre compte Google
         </p>
       </template>
 
-      <div class="space-y-4">
+      <div
+        class="space-y-4"
+      >
         <UButton
           color="primary"
           block
@@ -19,7 +31,10 @@
           class="flex items-center justify-center gap-2"
           @click="handleSignInWithGoogle"
         >
-          <svg class="w-5 h-5" viewBox="0 0 24 24">
+          <svg
+            class="w-5 h-5"
+            viewBox="0 0 24 24"
+          >
             <path
               fill="currentColor"
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -40,7 +55,10 @@
           Continuer avec Google
         </UButton>
 
-        <div v-if="error" class="text-red-500 text-sm text-center">
+        <div
+          v-if="error"
+          class="text-red-500 text-sm text-center"
+        >
           {{ error }}
         </div>
       </div>

@@ -17,29 +17,42 @@ const items = [{
 </script>
 
 <template>
-  <ul role="list" class="divide-y divide-default">
+  <ul
+    role="list"
+    class="divide-y divide-default"
+  >
     <li
       v-for="(member, index) in members"
       :key="index"
       class="flex items-center justify-between gap-3 py-3 px-4 sm:px-6"
     >
-      <div class="flex items-center gap-3 min-w-0">
+      <div
+        class="flex items-center gap-3 min-w-0"
+      >
         <UAvatar
           v-bind="member.avatar"
           size="md"
         />
 
-        <div class="text-sm min-w-0">
-          <p class="text-highlighted font-medium truncate">
+        <div
+          class="text-sm min-w-0"
+        >
+          <p
+            class="text-highlighted font-medium truncate"
+          >
             {{ member.name }}
           </p>
-          <p class="text-muted truncate">
+          <p
+            class="text-muted truncate"
+          >
             {{ member.username }}
           </p>
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
+      <div
+        class="flex items-center gap-3"
+      >
         <USelect
           :model-value="member.role"
           :items="['member', 'owner']"
@@ -47,7 +60,10 @@ const items = [{
           :ui="{ value: 'capitalize', item: 'capitalize' }"
         />
 
-        <UDropdownMenu :items="items" :content="{ align: 'end' }">
+        <UDropdownMenu
+          :items="items"
+          :content="{ align: 'end' }"
+        >
           <UButton
             icon="i-lucide-ellipsis-vertical"
             color="neutral"

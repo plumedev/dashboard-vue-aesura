@@ -19,7 +19,7 @@ export default ts.config(
         'error',
         {
           singleline: {
-            max: 3,
+            max: 4,
           },
           multiline: {
             max: 1,
@@ -29,7 +29,7 @@ export default ts.config(
       'vue/first-attribute-linebreak': [
         'error',
         {
-          singleline: 'ignore',
+          singleline: 'below',
           multiline: 'below',
         },
       ],
