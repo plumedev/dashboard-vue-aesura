@@ -206,21 +206,36 @@ const pagination = ref({
 </script>
 
 <template>
-  <UDashboardPanel id="customers">
-    <template #header>
-      <UDashboardNavbar title="Customers">
-        <template #leading>
+  <UDashboardPanel
+    id="customers"
+  >
+    <template
+      #header
+    >
+      <UDashboardNavbar
+        title="Customers"
+      >
+        <template
+          #leading
+        >
           <UDashboardSidebarCollapse />
         </template>
 
-        <template #right>
+        <template
+          #right
+        >
+          PLOP
           <CustomersAddModal />
         </template>
       </UDashboardNavbar>
     </template>
 
-    <template #body>
-      <div class="flex flex-wrap items-center justify-between gap-1.5">
+    <template
+      #body
+    >
+      <div
+        class="flex flex-wrap items-center justify-between gap-1.5"
+      >
         <UInput
           v-model="email"
           class="max-w-sm"
@@ -228,8 +243,12 @@ const pagination = ref({
           placeholder="Filter emails..."
         />
 
-        <div class="flex flex-wrap items-center gap-1.5">
-          <CustomersDeleteModal :count="table?.tableApi?.getFilteredSelectedRowModel().rows.length">
+        <div
+          class="flex flex-wrap items-center gap-1.5"
+        >
+          <CustomersDeleteModal
+            :count="table?.tableApi?.getFilteredSelectedRowModel().rows.length"
+          >
             <UButton
               v-if="table?.tableApi?.getFilteredSelectedRowModel().rows.length"
               label="Delete"
@@ -237,7 +256,9 @@ const pagination = ref({
               variant="subtle"
               icon="i-lucide-trash"
             >
-              <template #trailing>
+              <template
+                #trailing
+              >
                 <UKbd>
                   {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length }}
                 </UKbd>
@@ -309,13 +330,19 @@ const pagination = ref({
         }"
       />
 
-      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto">
-        <div class="text-sm text-muted">
+      <div
+        class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto"
+      >
+        <div
+          class="text-sm text-muted"
+        >
           {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0 }} of
           {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s) selected.
         </div>
 
-        <div class="flex items-center gap-1.5">
+        <div
+          class="flex items-center gap-1.5"
+        >
           <UPagination
             :default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
             :items-per-page="table?.tableApi?.getState().pagination.pageSize"

@@ -1,20 +1,88 @@
+<template>
+  <UDashboardPanel
+    id="home"
+  >
+    <template
+      #header
+    >
+      <UDashboardNavbar
+        title="Home"
+        :ui="{ right: 'gap-3' }"
+      >
+        <template
+          #leading
+        >
+          <UDashboardSidebarCollapse />
+        </template>
+
+        <template
+          #right
+        >
+          <UDropdownMenu
+            :items="items"
+          >
+            <UButton
+              icon="i-lucide-plus"
+              size="md"
+              class="rounded-full"
+            />
+          </UDropdownMenu>
+        </template>
+      </UDashboardNavbar>
+
+      <UDashboardToolbar>
+        <template
+          #left
+        >
+          <!-- NOTE: The `-ms-1` class is used to align with the `DashboardSidebarCollapse` button here. -->
+          <HomeDateRangePicker
+            v-model="range"
+            class="-ms-1"
+          />
+
+          <HomePeriodSelect
+            v-model="period"
+            :range="range"
+          />
+        </template>
+      </UDashboardToolbar>
+    </template>
+
+    <template
+      #body
+    >
+      <div
+        class="flex flex-col h-full min-h-0"
+      >
+        <HomeStats
+          :transactions="transactions"
+        />
+        <HomeTransactionsTable
+          :period="period"
+          :range="range"
+          :transactions="transactions"
+          :is-loading="isLoadingTransactions"
+        />
+      </div>
+    </template>
+  </UDashboardPanel>
+</template>
+
 <script setup lang="ts">
-import { ref, shallowRef } from 'vue'
+import { onMounted, ref, shallowRef, watch } from 'vue'
 import { sub } from 'date-fns'
 import type { DropdownMenuItem } from '@nuxt/ui'
-import { useDashboard } from '../composables/useDashboard'
 import type { Period, Range } from '../types'
+import { useGetTransactionByPeriod } from '@/composables/firebase/dedicated/useGetTransactionByPeriod'
+import { DocumentData } from 'firebase/firestore'
 
-const { isNotificationsSlideoverOpen } = useDashboard()
+const { isLoading: isLoadingTransactions, doRequest: getTransactions } = useGetTransactionByPeriod()
 
+const transactions = ref<DocumentData[]>([])
 const items = [[{
-  label: 'New mail',
-  icon: 'i-lucide-send',
-  to: '/inbox'
-}, {
-  label: 'New customer',
-  icon: 'i-lucide-user-plus',
-  to: '/customers'
+  label: 'Nouvelle transaction',
+  icon: 'i-lucide-banknote-arrow-up',
+  to: '/new-transaction'
 }]] satisfies DropdownMenuItem[][]
 
 const range = shallowRef<Range>({
@@ -22,45 +90,14 @@ const range = shallowRef<Range>({
   end: new Date()
 })
 const period = ref<Period>('daily')
+
+
+
+onMounted(async () => {
+  transactions.value = await getTransactions({ dateRange: { start: range.value.start, end: range.value.end } })
+})
+
+watch(range, async (newRange) => {
+  transactions.value = await getTransactions({ dateRange: { start: newRange.start, end: newRange.end } })
+}, { deep: true })
 </script>
-
-<template>
-  <UDashboardPanel id="home">
-    <template #header>
-      <UDashboardNavbar title="Home" :ui="{ right: 'gap-3' }">
-        <template #leading>
-          <UDashboardSidebarCollapse />
-        </template>
-
-        <template #right>
-          <UTooltip text="Notifications" :shortcuts="['N']">
-            <UButton color="neutral" variant="ghost" square @click="isNotificationsSlideoverOpen = true">
-              <UChip color="error" inset>
-                <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
-              </UChip>
-            </UButton>
-          </UTooltip>
-
-          <UDropdownMenu :items="items">
-            <UButton icon="i-lucide-plus" size="md" class="rounded-full" />
-          </UDropdownMenu>
-        </template>
-      </UDashboardNavbar>
-
-      <UDashboardToolbar>
-        <template #left>
-          <!-- NOTE: The `-ms-1` class is used to align with the `DashboardSidebarCollapse` button here. -->
-          <HomeDateRangePicker v-model="range" class="-ms-1" />
-
-          <HomePeriodSelect v-model="period" :range="range" />
-        </template>
-      </UDashboardToolbar>
-    </template>
-
-    <template #body>
-      <HomeStats :period="period" :range="range" />
-      <HomeChart :period="period" :range="range" />
-      <HomeSales :period="period" :range="range" />
-    </template>
-  </UDashboardPanel>
-</template>

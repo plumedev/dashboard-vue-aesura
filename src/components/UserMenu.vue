@@ -1,25 +1,54 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { useColorMode } from '@vueuse/core'
+import { useAuth } from '@/composables/firebase/useAuth'
+import { useAuthStore } from '@/stores/authStore'
+import RouteName from '@/router/RouteName'
 
 defineProps<{
   collapsed?: boolean
 }>()
 
+const router = useRouter()
 const colorMode = useColorMode()
 const appConfig = useAppConfig()
+const { signOut } = useAuth()
+const authStore = useAuthStore()
 
 const colors = ['red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose']
 const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone']
 
-const user = ref({
-  name: 'Benjamin Canac',
-  avatar: {
-    src: 'https://github.com/benjamincanac.png',
-    alt: 'Benjamin Canac'
+const user = computed(() => {
+  const firebaseUser = authStore.user
+  if (firebaseUser) {
+    return {
+      name: firebaseUser.displayName || firebaseUser.email || 'User',
+      avatar: {
+        src: firebaseUser.photoURL || undefined,
+        alt: firebaseUser.displayName || firebaseUser.email || 'User'
+      }
+    }
+  }
+  return {
+    name: 'User',
+    avatar: {
+      src: undefined,
+      alt: 'User'
+    }
   }
 })
+
+const handleLogout = async () => {
+  try {
+    await signOut()
+    router.push({ name: RouteName.LOGIN })
+  } catch (error) {
+    // L'erreur est déjà gérée dans useAuth avec un toast
+    console.error('Erreur lors de la déconnexion:', error)
+  }
+}
 
 const items = computed<DropdownMenuItem[][]>(() => ([[{
   type: 'label',
@@ -27,16 +56,14 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
   avatar: user.value.avatar
 }], [{
   label: 'Profile',
-  icon: 'i-lucide-user'
+  icon: 'i-lucide-user',
+  to: '/settings'
 }, {
-  label: 'Billing',
-  icon: 'i-lucide-credit-card'
-}, {
-  label: 'Settings',
+  label: 'Réglages',
   icon: 'i-lucide-settings',
   to: '/settings'
 }], [{
-  label: 'Theme',
+  label: 'Thème',
   icon: 'i-lucide-palette',
   children: [{
     label: 'Primary',
@@ -80,7 +107,7 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
     }))
   }]
 }, {
-  label: 'Appearance',
+  label: 'Apparence',
   icon: 'i-lucide-sun-moon',
   children: [{
     label: 'Light',
@@ -107,31 +134,9 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
     }
   }]
 }], [{
-  label: 'Templates',
-  icon: 'i-lucide-layout-template',
-  children: [{
-    label: 'Starter',
-    to: 'https://starter-vue-template.nuxt.dev/'
-  }, {
-    label: 'Dashboard',
-    to: 'https://dashboard-vue-template.nuxt.dev/',
-    color: 'primary',
-    checked: true,
-    type: 'checkbox'
-  }]
-}], [{
-  label: 'Documentation',
-  icon: 'i-lucide-book-open',
-  to: 'https://ui.nuxt.com/docs/getting-started/installation/vue',
-  target: '_blank'
-}, {
-  label: 'GitHub repository',
-  icon: 'simple-icons:github',
-  to: 'https://github.com/nuxt-ui-templates/dashboard-vue',
-  target: '_blank'
-}], [{
-  label: 'Log out',
-  icon: 'i-lucide-log-out'
+  label: 'Se déconnecter',
+  icon: 'i-lucide-log-out',
+  onSelect: handleLogout
 }]]))
 </script>
 
@@ -157,8 +162,12 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
       }"
     />
 
-    <template #chip-leading="{ item }">
-      <div class="inline-flex items-center justify-center shrink-0 size-5">
+    <template
+      #chip-leading="{ item }"
+    >
+      <div
+        class="inline-flex items-center justify-center shrink-0 size-5"
+      >
         <span
           class="rounded-full ring ring-bg bg-(--chip-light) dark:bg-(--chip-dark) size-2"
           :style="{

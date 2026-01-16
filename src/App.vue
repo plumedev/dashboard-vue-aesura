@@ -3,76 +3,58 @@ import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import type { NavigationMenuItem } from '@nuxt/ui'
+import RouteName from '@/router/RouteName'
 
 const toast = useToast()
 const route = useRoute()
 
+const isLoginPage = computed(() => route.name === RouteName.LOGIN)
+
 const open = ref(false)
 
 const links = [[{
-  label: 'Home',
+  label: 'Synthèse',
   icon: 'i-lucide-house',
   to: '/',
   onSelect: () => {
     open.value = false
   }
 }, {
-  label: 'Inbox',
-  icon: 'i-lucide-inbox',
-  to: '/inbox',
-  badge: '4',
+  label: 'Mon mois',
+  icon: 'i-lucide-calendar',
+  to: '/my-month',
   onSelect: () => {
     open.value = false
   }
 }, {
-  label: 'Customers',
-  icon: 'i-lucide-users',
-  to: '/customers',
-  onSelect: () => {
-    open.value = false
-  }
-}, {
-  label: 'Settings',
+  label: 'Réglages',
   to: '/settings',
   icon: 'i-lucide-settings',
   defaultOpen: true,
   type: 'trigger',
   children: [{
-    label: 'General',
+    label: 'Général',
+    icon: 'i-lucide-user',
     to: '/settings',
     exact: true,
     onSelect: () => {
       open.value = false
     }
   }, {
-    label: 'Members',
-    to: '/settings/members',
-    onSelect: () => {
-      open.value = false
-    }
-  }, {
     label: 'Notifications',
+    icon: 'i-lucide-bell',
     to: '/settings/notifications',
     onSelect: () => {
       open.value = false
     }
   }, {
-    label: 'Security',
+    label: 'Sécurité',
+    icon: 'i-lucide-shield',
     to: '/settings/security',
     onSelect: () => {
       open.value = false
     }
   }]
-}], [{
-  label: 'Feedback',
-  icon: 'i-lucide-message-circle',
-  to: 'https://github.com/nuxt-ui-templates/dashboard-vue',
-  target: '_blank'
-}, {
-  label: 'Help & Support',
-  icon: 'i-lucide-info',
-  to: 'https://github.com/nuxt/ui',
-  target: '_blank'
 }]] satisfies NavigationMenuItem[][]
 
 const groups = computed(() => [{
@@ -116,50 +98,38 @@ if (cookie.value !== 'accepted') {
 <template>
   <Suspense>
     <UApp>
-      <UDashboardGroup unit="rem" storage="local">
-        <UDashboardSidebar
-          id="default"
-          v-model:open="open"
-          collapsible
-          resizable
-          class="bg-elevated/25"
-          :ui="{ footer: 'lg:border-t lg:border-default' }"
-        >
-          <template #header="{ collapsed }">
-            <TeamsMenu :collapsed="collapsed" />
-          </template>
-
-          <template #default="{ collapsed }">
-            <UDashboardSearchButton :collapsed="collapsed" class="bg-transparent ring-default" />
-
-            <UNavigationMenu
-              :collapsed="collapsed"
-              :items="links[0]"
-              orientation="vertical"
-              tooltip
-              popover
-            />
-
-            <UNavigationMenu
-              :collapsed="collapsed"
-              :items="links[1]"
-              orientation="vertical"
-              tooltip
-              class="mt-auto"
-            />
-          </template>
-
-          <template #footer="{ collapsed }">
-            <UserMenu :collapsed="collapsed" />
-          </template>
-        </UDashboardSidebar>
-
-        <UDashboardSearch :groups="groups" />
-
+      <template v-if="isLoginPage">
         <RouterView />
+      </template>
+      <template v-else>
+        <UDashboardGroup unit="rem" storage="local">
+          <UDashboardSidebar id="default" v-model:open="open" collapsible resizable class="bg-elevated/25"
+            :ui="{ footer: 'lg:border-t lg:border-default' }">
+            <template #header="{ collapsed }">
+              <AppLogo :collapsed="collapsed" />
+            </template>
 
-        <NotificationsSlideover />
-      </UDashboardGroup>
+            <template #default="{ collapsed }">
+              <UDashboardSearchButton :collapsed="collapsed" class="bg-transparent ring-default" />
+
+              <UNavigationMenu :collapsed="collapsed" :items="links[0]" orientation="vertical" tooltip popover />
+
+              <UNavigationMenu :collapsed="collapsed" :items="links[1]" orientation="vertical" tooltip
+                class="mt-auto" />
+            </template>
+
+            <template #footer="{ collapsed }">
+              <UserMenu :collapsed="collapsed" />
+            </template>
+          </UDashboardSidebar>
+
+          <UDashboardSearch :groups="groups" />
+
+          <RouterView />
+
+          <NotificationsSlideover />
+        </UDashboardGroup>
+      </template>
     </UApp>
   </Suspense>
 </template>

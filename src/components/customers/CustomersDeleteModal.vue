@@ -23,8 +23,12 @@ async function onSubmit() {
   >
     <slot />
 
-    <template #body>
-      <div class="flex justify-end gap-2">
+    <template
+      #body
+    >
+      <div
+        class="flex justify-end gap-2"
+      >
         <UButton
           label="Cancel"
           color="neutral"

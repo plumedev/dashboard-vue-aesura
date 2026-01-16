@@ -7,21 +7,17 @@ const links = [[{
   to: '/settings',
   exact: true
 }, {
-  label: 'Members',
-  icon: 'i-lucide-users',
-  to: '/settings/members'
-}, {
   label: 'Notifications',
   icon: 'i-lucide-bell',
   to: '/settings/notifications'
 }, {
-  label: 'Security',
+  label: 'Sécurité',
   icon: 'i-lucide-shield',
   to: '/settings/security'
 }], [{
-  label: 'Documentation',
-  icon: 'i-lucide-book-open',
-  to: 'https://ui.nuxt.com/docs/getting-started/installation/vue',
+  label: 'Aesura.com',
+  icon: 'i-lucide-globe',
+  to: 'https://aesura.com',
   target: '_blank'
 }]] satisfies NavigationMenuItem[][]
 </script>

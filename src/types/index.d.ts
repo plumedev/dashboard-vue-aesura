@@ -1,5 +1,13 @@
 import type { AvatarProps } from '@nuxt/ui'
 
+declare module 'vue-router' {
+  interface RouteMeta {
+    title?: string
+    requiresAuth?: boolean
+    icon?: string
+  }
+}
+
 export type UserStatus = 'subscribed' | 'unsubscribed' | 'bounced'
 export type SaleStatus = 'paid' | 'failed' | 'refunded'
 

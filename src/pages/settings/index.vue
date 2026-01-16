@@ -71,7 +71,9 @@ function onFileClick() {
       />
     </UPageCard>
 
-    <UPageCard variant="subtle">
+    <UPageCard
+      variant="subtle"
+    >
       <UFormField
         name="name"
         label="Name"
@@ -119,7 +121,9 @@ function onFileClick() {
         description="JPG, GIF or PNG. 1MB Max."
         class="flex max-sm:flex-col justify-between sm:items-center gap-4"
       >
-        <div class="flex flex-wrap items-center gap-3">
+        <div
+          class="flex flex-wrap items-center gap-3"
+        >
           <UAvatar
             :src="profile.avatar"
             :alt="profile.name"
