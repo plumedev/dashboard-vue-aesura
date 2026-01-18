@@ -50,8 +50,8 @@ const convertTransactionsForTable = (transactions: DocumentData[]): TransactionF
 }
 
 const props = defineProps<{
-  period: Period
-  range: Range
+  period?: Period
+  range?: Range
   transactions: DocumentData[]
   isLoading: boolean
 }>()
