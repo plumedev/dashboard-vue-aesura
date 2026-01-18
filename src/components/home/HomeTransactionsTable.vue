@@ -1,38 +1,26 @@
 <template>
-  <div
-    class="flex-1 flex flex-col min-h-0 mt-5"
-  >
-    <UTable
-      sticky
-      loading-animation="carousel"
-      :loading="isLoading"
-      :data="convertTransactionsForTable(transactions)"
-      :columns="columns"
-      class="flex-1 overflow-auto"
-      :ui="{
+  <div class="flex-1 flex flex-col min-h-0 mt-5">
+    <UInput v-model="searchQuery" placeholder="Rechercher une transaction..." icon="i-lucide-search" class="mb-4"
+      :ui="{ base: 'w-full' }" />
+    <UTable sticky loading-animation="carousel" :loading="isLoading" :data="filteredTransactions" :columns="columns"
+      class="flex-1 overflow-auto" :ui="{
         base: 'table-fixed border-separate border-spacing-0',
         thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
         tbody: '[&>tr]:last:[&>td]:border-b-0',
         th: 'first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
         td: 'border-b border-default'
-      }"
-    />
+      }" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { h, resolveComponent } from 'vue'
+import { computed, h, ref, resolveComponent } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 import type { Period, Range } from '../../types'
 import { DocumentData, Timestamp } from 'firebase/firestore'
 import { formatDate } from '@/helpers/dateHelpers'
 
-defineProps<{
-  period: Period
-  range: Range
-  transactions: DocumentData[]
-  isLoading: boolean
-}>()
+const searchQuery = ref('')
 
 export interface TransactionForTable {
   label: string
@@ -60,6 +48,48 @@ const convertTransactionsForTable = (transactions: DocumentData[]): TransactionF
     }
   })
 }
+
+const props = defineProps<{
+  period: Period
+  range: Range
+  transactions: DocumentData[]
+  isLoading: boolean
+}>()
+
+const allTransactions = computed(() => convertTransactionsForTable(props.transactions))
+
+const filteredTransactions = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return allTransactions.value
+  }
+
+  const query = searchQuery.value.toLowerCase().trim()
+
+  return allTransactions.value.filter((transaction) => {
+    // Recherche dans le libellé
+    const labelMatch = transaction.label.toLowerCase().includes(query)
+
+    // Recherche dans le type (en français)
+    const typeLabel = transaction.type === 'expense' ? 'dépense' : transaction.type === 'income' ? 'revenu' : transaction.type
+    const typeMatch = typeLabel.toLowerCase().includes(query)
+
+    // Recherche dans le compte
+    const accountMatch = transaction.account.toLowerCase().includes(query)
+
+    // Recherche dans le montant (formaté)
+    const formattedAmount = new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'EUR'
+    }).format(transaction.amount)
+    const amountMatch = formattedAmount.toLowerCase().includes(query) || transaction.amount.toString().includes(query)
+
+    // Recherche dans la date formatée
+    const formattedDate = formatDate(transaction.date)
+    const dateMatch = formattedDate.toLowerCase().includes(query)
+
+    return labelMatch || typeMatch || accountMatch || amountMatch || dateMatch
+  })
+})
 
 const columns: TableColumn<TransactionForTable>[] = [
   {
@@ -205,5 +235,3 @@ const columns: TableColumn<TransactionForTable>[] = [
   }
 ]
 </script>
-
-
