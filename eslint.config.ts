@@ -15,31 +15,9 @@ export default ts.config(
     },
     rules: {
       'vue/multi-word-component-names': 'off',
-      'vue/max-attributes-per-line': [
-        'error',
-        {
-          singleline: {
-            max: 4,
-          },
-          multiline: {
-            max: 1,
-          },
-        },
-      ],
-      'vue/first-attribute-linebreak': [
-        'error',
-        {
-          singleline: 'below',
-          multiline: 'below',
-        },
-      ],
-      'vue/html-closing-bracket-newline': [
-        'error',
-        {
-          singleline: 'never',
-          multiline: 'always',
-        },
-      ],
+      'vue/html-closing-bracket-newline': 'off',
+      'vue/max-attributes-per-line': 'off',
+      'vue/first-attribute-linebreak': 'off',
       'no-undef': 'off',
     },
   }
