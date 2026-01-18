@@ -66,3 +66,9 @@ export interface Range {
   start: Date
   end: Date
 }
+
+export enum Account {
+  CIC = 'cic',
+  CRYPTOCOM= 'crypto.com',
+  REVOLUT= 'revolut',
+}
