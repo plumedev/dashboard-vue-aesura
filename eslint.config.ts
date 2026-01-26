@@ -16,8 +16,9 @@ export default ts.config(
     rules: {
       'vue/multi-word-component-names': 'off',
       'vue/html-closing-bracket-newline': 'off',
-      'vue/max-attributes-per-line': 'off',
+      'vue/max-attributes-per-line': 'on',
       'vue/first-attribute-linebreak': 'off',
+      'vue/html-indent': 'off',
       'no-undef': 'off',
     },
   }

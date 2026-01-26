@@ -8,6 +8,13 @@
           Nouvelle transaction
         </h2>
         <UForm>
+          <UAlert v-if="!accounts.length" color="warning" variant="subtle" class="mb-4"
+            title="Il semblrait que tout ne soit pas prêt" icon="i-lucide-octagon-alert">
+            <template #description>
+              Il semblerait que vous n'ayez pas encore de compte. <br>
+              Rendez-vous dans l'onglet 'Comptes' pour en créer un.
+            </template>
+          </UAlert>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <UFormField required>
               <UInput v-model="formState.name" placeholder="Nom de la transaction" class="w-full" />
@@ -30,15 +37,9 @@
               <UInputDate v-if="isRangeMode" ref="inputDate" v-model="rangeDate" range>
                 <template #trailing>
                   <UPopover :reference="inputDate?.inputsRef[0]?.$el">
-                    <UButton
-                      color="neutral"
-                      variant="link"
-                      size="sm"
-                      icon="i-lucide-calendar"
-                      aria-label="Select a date range"
-                      class="px-0"
-                    />
-  
+                    <UButton color="neutral" variant="link" size="sm" icon="i-lucide-calendar"
+                      aria-label="Select a date range" class="px-0" />
+
                     <template #content>
                       <UCalendar v-model="rangeDate" class="p-2" :number-of-months="2" range />
                     </template>
@@ -48,15 +49,9 @@
               <UInputDate v-else ref="inputDate" v-model="singleDate">
                 <template #trailing>
                   <UPopover :reference="inputDate?.inputsRef[0]?.$el">
-                    <UButton
-                      color="neutral"
-                      variant="link"
-                      size="sm"
-                      icon="i-lucide-calendar"
-                      aria-label="Select a date"
-                      class="px-0"
-                    />
-  
+                    <UButton color="neutral" variant="link" size="sm" icon="i-lucide-calendar"
+                      aria-label="Select a date" class="px-0" />
+
                     <template #content>
                       <UCalendar v-model="singleDate" class="p-2" />
                     </template>
@@ -65,15 +60,11 @@
               </UInputDate>
             </UFormField>
             <UFormField class="mt-2 mb-4">
-              <USwitch
-                v-model="isRangeMode"
-                unchecked-icon="i-lucide-x"
-                checked-icon="i-lucide-check"
-                label="Date de fin"
-              />
+              <USwitch v-model="isRangeMode" unchecked-icon="i-lucide-x" checked-icon="i-lucide-check"
+                label="Date de fin" />
             </UFormField>
           </div>
-          <UButton label="Ajouter" color="primary" />
+          <UButton label="Ajouter" color="primary" @click="handleAddTransaction" :loading="isCreatingTransaction" />
         </UForm>
       </UCard>
     </template>
@@ -84,10 +75,14 @@
 import { computed, ref, shallowRef, useTemplateRef, watch } from 'vue';
 import { useReadFireDoc } from '@/composables/firebase/useReadFireDoc';
 import { onMounted } from 'vue';
-import { DocumentData } from 'firebase/firestore';
+import { DocumentData, Timestamp } from 'firebase/firestore';
 import type { SelectItem } from '@nuxt/ui';
 import type { TabsItem } from '@nuxt/ui';
 import { CalendarDate } from '@internationalized/date'
+import { useCreateFireDoc } from '@/composables/firebase/useCreateFireDoc';
+
+
+const { doRequest: createTransaction, isLoading: isCreatingTransaction } = useCreateFireDoc()
 
 interface FormState {
   name: string
@@ -111,16 +106,16 @@ const rangeDate = shallowRef({
 })
 
 const { doRequest: getAccounts } = useReadFireDoc()
-
 const accounts = ref<DocumentData[]>([])
-
 const accountsOptions = computed<{ label: string; value: string }[]>(() => {
-  if (!accounts.value.length) return [
-    {
-      label: 'Aucun compte',
-      value: '',
-    }
-  ]
+  if (!accounts.value.length) {
+    return [
+      {
+        label: 'Aucun compte',
+        value: '',
+      }
+    ]
+  }
   return accounts.value.map((account) => {
     return {
       label: account.accountName,
@@ -186,5 +181,28 @@ onMounted(async () => {
   }
   formState.value.account = accountsOptions.value[0]?.value as string
 })
+
+const calendarDateToTimestamp = (calendarDate: { year: number; month: number; day: number }): Timestamp => {
+  const jsDate = new Date(calendarDate.year, calendarDate.month - 1, calendarDate.day)
+  return Timestamp.fromDate(jsDate)
+}
+
+const handleAddTransaction = async () => {
+  const transactionData = {
+    name: formState.value.name,
+    amount: formState.value.amount,
+    type: formState.value.type,
+    account: formState.value.account,
+    frequency: formState.value.frequency,
+    effectDate: calendarDateToTimestamp(formState.value.startDate),
+    effectEndDate: calendarDateToTimestamp(formState.value.endDate)
+  }
+  console.log('transactionData', transactionData)
+  await createTransaction({
+    collectionName: 'transactions',
+    data: transactionData
+  })
+}
+
 
 </script>
