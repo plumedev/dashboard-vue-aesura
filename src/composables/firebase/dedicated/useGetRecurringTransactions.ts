@@ -13,8 +13,6 @@ export function useGetRecurringTransactions() {
         collectionName: 'recurringTransactions',
       })
 
-      console.log('Recurring transactions:', result)
-
       if (!Array.isArray(result)) {
         throw new Error("Le résultat n'est pas un tableau")
       }

@@ -1,6 +1,6 @@
 <template>
-  <UModal>
-    <UButton label="Open" color="neutral" variant="subtle" />
+  <UModal v-model:open="open">
+    <UButton icon="i-lucide-plus" variant="solid" class="rounded-full" />
 
     <template #content>
       <UCard>
@@ -93,6 +93,11 @@ interface FormState {
   endDate: CalendarDate
   type: 'income' | 'expense'
 }
+
+const emit = defineEmits(['transactionCreated'])
+
+const open = ref(false)
+
 
 const inputDate = useTemplateRef('inputDate')
 const isRangeMode = ref(true)
@@ -188,20 +193,26 @@ const calendarDateToTimestamp = (calendarDate: { year: number; month: number; da
 }
 
 const handleAddTransaction = async () => {
+  const selectedAccount = accounts.value.find(acc => acc.id === formState.value.account)
+
   const transactionData = {
     name: formState.value.name,
     amount: formState.value.amount,
     type: formState.value.type,
-    account: formState.value.account,
+    account: {
+      value: selectedAccount?.id || formState.value.account,
+      label: selectedAccount?.accountName || ''
+    },
     frequency: formState.value.frequency,
     effectDate: calendarDateToTimestamp(formState.value.startDate),
     effectEndDate: calendarDateToTimestamp(formState.value.endDate)
   }
-  console.log('transactionData', transactionData)
   await createTransaction({
-    collectionName: 'transactions',
+    collectionName: 'recurringTransactions',
     data: transactionData
   })
+  emit('transactionCreated')
+  open.value = false
 }
 
 

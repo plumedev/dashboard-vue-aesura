@@ -1,32 +1,13 @@
 <template>
   <UFormField :label="label" :class="fieldClass">
-    <UInputDate 
-      :id="id" 
-      ref="inputEffectDate" 
-      v-model="dateRange" 
-      class="mt-0.5"
-      locale="fr-FR" 
-      range
-    >
+    <UInputDate :id="id" ref="inputEffectDate" v-model="dateRange" class="mt-0.5" locale="fr-FR" range>
       <template #trailing>
         <UPopover :reference="inputEffectDate?.inputsRef[0]?.$el">
-          <UButton 
-            color="neutral" 
-            variant="link" 
-            size="sm" 
-            icon="i-lucide-calendar"
-            :aria-label="ariaLabel" 
-            class="px-0" 
-          />
+          <UButton color="neutral" variant="link" size="sm" icon="i-lucide-calendar" :aria-label="ariaLabel"
+            class="px-0" />
 
           <template #content>
-            <UCalendar 
-              v-model="dateRange" 
-              class="p-2" 
-              :number-of-months="numberOfMonths" 
-              locale="fr-FR" 
-              range 
-            />
+            <UCalendar v-model="dateRange" class="p-2" :number-of-months="numberOfMonths" locale="fr-FR" range />
           </template>
         </UPopover>
       </template>
@@ -71,7 +52,6 @@ const dateRange = shallowRef<DateRange>({
   end: props.modelValue?.end || new CalendarDate(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate())
 })
 
-// Synchroniser avec le v-model externe
 watch(() => props.modelValue, (newValue) => {
   if (newValue) {
     dateRange.value = {
@@ -81,7 +61,6 @@ watch(() => props.modelValue, (newValue) => {
   }
 }, { deep: true, immediate: true })
 
-// Émettre les changements vers le parent
 watch(dateRange, (newValue) => {
   emit('update:modelValue', {
     start: newValue.start,

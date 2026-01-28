@@ -43,7 +43,7 @@ const convertTransactionsForTable = (transactions: DocumentData[]): TransactionF
       date: transaction.effectDate,
       type: transaction.type || '',
       amount: transaction.amount || 0,
-      account: transaction.account || '',
+      account: transaction.account?.label || '',
       frequency: transaction.frequency || ''
     }
   })
