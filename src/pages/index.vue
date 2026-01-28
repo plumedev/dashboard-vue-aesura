@@ -1,68 +1,33 @@
 <template>
-  <UDashboardPanel
-    id="home"
-  >
-    <template
-      #header
-    >
-      <UDashboardNavbar
-        title="Home"
-        :ui="{ right: 'gap-3' }"
-      >
-        <template
-          #leading
-        >
+  <UDashboardPanel id="home">
+    <template #header>
+      <UDashboardNavbar title="Home" :ui="{ right: 'gap-3' }">
+        <template #leading>
           <UDashboardSidebarCollapse />
         </template>
 
-        <template
-          #right
-        >
-          <UDropdownMenu
-            :items="items"
-          >
-            <UButton
-              icon="i-lucide-plus"
-              size="md"
-              class="rounded-full"
-            />
+        <template #right>
+          <UDropdownMenu :items="items">
+            <UButton icon="i-lucide-plus" size="md" class="rounded-full" />
           </UDropdownMenu>
         </template>
       </UDashboardNavbar>
 
       <UDashboardToolbar>
-        <template
-          #left
-        >
+        <template #left>
           <!-- NOTE: The `-ms-1` class is used to align with the `DashboardSidebarCollapse` button here. -->
-          <HomeDateRangePicker
-            v-model="range"
-            class="-ms-1"
-          />
+          <HomeDateRangePicker v-model="range" class="-ms-1" />
 
-          <HomePeriodSelect
-            v-model="period"
-            :range="range"
-          />
+          <HomePeriodSelect v-model="period" :range="range" />
         </template>
       </UDashboardToolbar>
     </template>
 
-    <template
-      #body
-    >
-      <div
-        class="flex flex-col h-full min-h-0"
-      >
-        <HomeStats
-          :transactions="transactions"
-        />
-        <HomeTransactionsTable
-          :period="period"
-          :range="range"
-          :transactions="transactions"
-          :is-loading="isLoadingTransactions"
-        />
+    <template #body>
+      <div class="flex flex-col h-full min-h-0">
+        <HomeStats :transactions="transactions" />
+        <HomeTransactionsTable :period="period" :range="range" :transactions="transactions"
+          :is-loading="isLoadingTransactions" />
       </div>
     </template>
   </UDashboardPanel>
