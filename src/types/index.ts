@@ -69,6 +69,13 @@ export interface Range {
 
 export enum Account {
   CIC = 'cic',
-  CRYPTOCOM= 'crypto.com',
-  REVOLUT= 'revolut',
+  CRYPTOCOM = 'crypto.com',
+  REVOLUT = 'revolut',
+}
+
+export enum Frequency {
+  UNIQUE = 'once',
+  MONTHLY = 'monthly',
+  QUARTERLY = 'quarterly',
+  YEARLY = 'yearly',
 }

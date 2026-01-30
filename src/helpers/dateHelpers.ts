@@ -1,4 +1,5 @@
 import { Timestamp } from 'firebase/firestore'
+import { CalendarDate } from '@internationalized/date'
 
 /**
  * Convertit une date au format ISO "2026-01-30" (YYYY-MM-DD)
@@ -92,4 +93,30 @@ export function formatDate(date: Date | Timestamp | string | null | undefined): 
     month: 'short',
     year: 'numeric',
   })
+}
+
+/**
+ * Convertit un Timestamp Firestore en CalendarDate.
+ *
+ * @param timestamp - Le Timestamp à convertir
+ * @returns Un CalendarDate
+ */
+export function timestampToCalendarDate(timestamp: Timestamp): CalendarDate {
+  const date = timestamp.toDate()
+  return new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate())
+}
+
+/**
+ * Convertit un CalendarDate en Timestamp Firestore.
+ *
+ * @param calendarDate - Le CalendarDate à convertir
+ * @returns Un Timestamp Firestore
+ */
+export function calendarDateToTimestamp(calendarDate: {
+  year: number
+  month: number
+  day: number
+}): Timestamp {
+  const jsDate = new Date(calendarDate.year, calendarDate.month - 1, calendarDate.day)
+  return Timestamp.fromDate(jsDate)
 }

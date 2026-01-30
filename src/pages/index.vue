@@ -56,8 +56,6 @@ const range = shallowRef<Range>({
 })
 const period = ref<Period>('daily')
 
-
-
 onMounted(async () => {
   transactions.value = await getTransactions({ dateRange: { start: range.value.start, end: range.value.end } })
 })

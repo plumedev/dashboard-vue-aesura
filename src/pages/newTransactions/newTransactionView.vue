@@ -1,11 +1,11 @@
 <template>
   <UModal v-model:open="open">
-    <UButton icon="i-lucide-plus" variant="solid" class="rounded-full" />
+    <UButton v-if="!isEditMode" icon="i-lucide-plus" variant="solid" class="rounded-full" />
 
     <template #content>
       <UCard>
         <h2 class="text-2xl font-bold mb-4">
-          Nouvelle transaction
+          {{ isEditMode ? 'Modifier la transaction' : 'Nouvelle transaction' }}
         </h2>
         <UForm>
           <UAlert v-if="!accounts.length" color="warning" variant="subtle" class="mb-4"
@@ -64,7 +64,7 @@
                 label="Date de fin" />
             </UFormField>
           </div>
-          <UButton label="Ajouter" color="primary" @click="handleAddTransaction" :loading="isCreatingTransaction" />
+          <UButton :label="isEditMode ? 'Modifier' : 'Ajouter'" color="primary" @click="handleSubmit" :loading="isSubmitting" />
         </UForm>
       </UCard>
     </template>
@@ -80,9 +80,29 @@ import type { SelectItem } from '@nuxt/ui';
 import type { TabsItem } from '@nuxt/ui';
 import { CalendarDate } from '@internationalized/date'
 import { useCreateFireDoc } from '@/composables/firebase/useCreateFireDoc';
+import { useUpdateFireDoc } from '@/composables/firebase/useUpdateFireDoc';
+import { calendarDateToTimestamp, timestampToCalendarDate } from '@/helpers/dateHelpers';
 
+export interface TransactionData {
+  id: string
+  name: string
+  amount: number
+  type: 'income' | 'expense'
+  account: { value: string; label: string }
+  frequency: 'once' | 'monthly' | 'quarterly' | 'yearly'
+  effectDate: Timestamp
+  effectEndDate: Timestamp
+}
+
+const props = defineProps<{
+  transaction?: TransactionData
+}>()
 
 const { doRequest: createTransaction, isLoading: isCreatingTransaction } = useCreateFireDoc()
+const { doRequest: updateTransaction, isLoading: isUpdatingTransaction } = useUpdateFireDoc()
+
+const isSubmitting = computed(() => isCreatingTransaction.value || isUpdatingTransaction.value)
+const isEditMode = computed(() => !!props.transaction)
 
 interface FormState {
   name: string
@@ -94,7 +114,7 @@ interface FormState {
   type: 'income' | 'expense'
 }
 
-const emit = defineEmits(['transactionCreated'])
+const emit = defineEmits(['transactionCreated', 'transactionUpdated'])
 
 const open = ref(false)
 
@@ -159,7 +179,7 @@ const typeOptions = ref<SelectItem[]>([
   }
 ])
 
-const formState = ref<FormState>({
+const getDefaultFormState = (): FormState => ({
   name: '',
   amount: null,
   account: '',
@@ -168,6 +188,83 @@ const formState = ref<FormState>({
   endDate: rangeDate.value.end,
   type: 'expense'
 })
+
+const formState = ref<FormState>(getDefaultFormState())
+
+
+const initFormFromTransaction = (transaction: TransactionData) => {
+  formState.value = {
+    name: transaction.name,
+    amount: transaction.amount,
+    account: transaction.account.value,
+    frequency: transaction.frequency,
+    startDate: timestampToCalendarDate(transaction.effectDate),
+    endDate: timestampToCalendarDate(transaction.effectEndDate),
+    type: transaction.type
+  }
+  
+
+  const startDate = timestampToCalendarDate(transaction.effectDate)
+  const endDate = timestampToCalendarDate(transaction.effectEndDate)
+  
+  singleDate.value = startDate
+  rangeDate.value = { start: startDate, end: endDate }
+  
+  isRangeMode.value = startDate.compare(endDate) !== 0
+}
+
+
+const handleSubmit = async () => {
+  const selectedAccount = accounts.value.find(acc => acc.id === formState.value.account)
+
+  const transactionData = {
+    name: formState.value.name,
+    amount: formState.value.amount,
+    type: formState.value.type,
+    account: {
+      value: selectedAccount?.id || formState.value.account,
+      label: selectedAccount?.accountName || ''
+    },
+    frequency: formState.value.frequency,
+    effectDate: calendarDateToTimestamp(formState.value.startDate),
+    effectEndDate: calendarDateToTimestamp(formState.value.endDate)
+  }
+
+  if (isEditMode.value && props.transaction) {
+    await updateTransaction({
+      collectionName: 'recurringTransactions',
+      documentId: props.transaction.id,
+      data: transactionData
+    })
+    emit('transactionUpdated')
+  } else {
+    await createTransaction({
+      collectionName: 'recurringTransactions',
+      data: transactionData
+    })
+    emit('transactionCreated')
+  }
+  open.value = false
+}
+
+
+const openModal = () => {
+  if (props.transaction) {
+    initFormFromTransaction(props.transaction)
+  } else {
+    formState.value = getDefaultFormState()
+    formState.value.account = accountsOptions.value[0]?.value as string
+  }
+  open.value = true
+}
+defineExpose({ openModal })
+
+// Watch si on a une transaction en prop, on initialise le formulaire en modification
+watch(() => props.transaction, (newTransaction) => {
+  if (newTransaction) {
+    initFormFromTransaction(newTransaction)
+  }
+}, { immediate: true })
 
 watch(rangeDate, (newValue) => {
   formState.value.startDate = newValue.start
@@ -184,36 +281,8 @@ onMounted(async () => {
   if (result && Array.isArray(result)) {
     accounts.value = result
   }
-  formState.value.account = accountsOptions.value[0]?.value as string
-})
-
-const calendarDateToTimestamp = (calendarDate: { year: number; month: number; day: number }): Timestamp => {
-  const jsDate = new Date(calendarDate.year, calendarDate.month - 1, calendarDate.day)
-  return Timestamp.fromDate(jsDate)
-}
-
-const handleAddTransaction = async () => {
-  const selectedAccount = accounts.value.find(acc => acc.id === formState.value.account)
-
-  const transactionData = {
-    name: formState.value.name,
-    amount: formState.value.amount,
-    type: formState.value.type,
-    account: {
-      value: selectedAccount?.id || formState.value.account,
-      label: selectedAccount?.accountName || ''
-    },
-    frequency: formState.value.frequency,
-    effectDate: calendarDateToTimestamp(formState.value.startDate),
-    effectEndDate: calendarDateToTimestamp(formState.value.endDate)
+  if (!isEditMode.value) {
+    formState.value.account = accountsOptions.value[0]?.value as string
   }
-  await createTransaction({
-    collectionName: 'recurringTransactions',
-    data: transactionData
-  })
-  emit('transactionCreated')
-  open.value = false
-}
-
-
+})
 </script>
