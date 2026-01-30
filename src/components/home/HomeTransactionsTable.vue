@@ -16,11 +16,14 @@
 <script setup lang="ts">
 import { computed, h, ref, resolveComponent } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
-import type { Period, Range } from '../../types'
+import { Frequency, type Period, type Range } from '../../types'
 import { DocumentData, Timestamp } from 'firebase/firestore'
 import { formatDate } from '@/helpers/dateHelpers'
+import { useDeleteFireDoc } from '@/composables/firebase/useDeleteFireDoc'
 
 const searchQuery = ref('')
+
+const { doRequest: deleteTransaction } = useDeleteFireDoc()
 
 export interface TransactionForTable {
   label: string
@@ -34,6 +37,7 @@ export interface TransactionForTable {
 
 const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
+const UDropdownMenu = resolveComponent('UDropdownMenu')
 
 const convertTransactionsForTable = (transactions: DocumentData[]): TransactionForTable[] => {
   return transactions.map((transaction) => {
@@ -144,6 +148,35 @@ const columns: TableColumn<TransactionForTable>[] = [
       return dateAObj.getTime() - dateBObj.getTime()
     }
   },
+    {
+    accessorKey: 'frequency',
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted()
+
+      return h(UButton, {
+        color: 'neutral',
+        variant: 'ghost',
+        label: 'Fréquence',
+        icon: isSorted
+          ? isSorted === 'asc'
+            ? 'i-lucide-arrow-up-a-z'
+            : 'i-lucide-arrow-down-a-z'
+          : 'i-lucide-arrow-down-up',
+        class: '-mx-2.5',
+        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+      })
+    },
+    cell: ({ row }) => {
+      const frequency = row.getValue('frequency') as string
+      const frequencyLabels: Record<string, string> = {
+        [Frequency.UNIQUE]: 'Unique',
+        [Frequency.MONTHLY]: 'Mensuel',
+        [Frequency.QUARTERLY]: 'Trimestriel',
+        [Frequency.YEARLY]: 'Annuel'
+      }
+      return frequencyLabels[frequency] || frequency
+    }
+  },
   {
     accessorKey: 'type',
     header: ({ column }) => {
@@ -232,6 +265,72 @@ const columns: TableColumn<TransactionForTable>[] = [
 
       return h('div', { class: 'text-right font-medium' }, formatted)
     }
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => {
+      const transactionId = row.original.id
+      return h(
+        'div',
+        { class: 'text-right' },
+        h(
+          UDropdownMenu,
+          {
+            content: {
+              align: 'end'
+            },
+            items: getRowActions(transactionId)
+          },
+          () =>
+            h(UButton, {
+              icon: 'i-lucide-ellipsis-vertical',
+              color: 'neutral',
+              variant: 'ghost',
+              class: 'ml-auto'
+            })
+        )
+      )
+    }
   }
 ]
+
+const emit = defineEmits<{
+  (e: 'transactionDeleted'): void
+  (e: 'editTransaction', transaction: DocumentData): void
+}>()
+
+
+function getRowActions(transactionId: string) {
+  return [
+    {
+      type: 'label',
+      label: 'Actions'
+    },
+    {
+      label: 'Éditer',
+      icon: 'i-lucide-pencil',
+      onSelect() {
+        const originalTransaction = props.transactions.find(t => t.id === transactionId)
+        if (originalTransaction) {
+          emit('editTransaction', originalTransaction)
+        }
+      }
+    },
+    {
+      type: 'separator'
+    },
+    {
+      label: 'Supprimer',
+      icon: 'i-lucide-trash',
+      color: 'error',
+      async onSelect() {
+        await deleteTransaction({
+          collectionName: 'recurringTransactions',
+          documentId: transactionId
+        })
+        emit('transactionDeleted')
+      }
+    }
+  ]
+}
 </script>
