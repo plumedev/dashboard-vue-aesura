@@ -26,7 +26,7 @@
     <template #body>
       <div class="flex flex-col h-full min-h-0">
         <HomeStats :transactions="transactions" />
-        <HomeTransactionsTable :period="period" :range="range" :transactions="transactions"
+        <HomeSynthesisTable :period="period" :range="range" :transactions="transactions"
           :is-loading="isLoadingTransactions" />
       </div>
     </template>
@@ -34,14 +34,17 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, shallowRef, watch } from 'vue'
+import { ref, shallowRef, watch } from 'vue'
 import { sub } from 'date-fns'
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Period, Range } from '../types'
 import { useGetTransactionByPeriod } from '@/composables/firebase/dedicated/useGetTransactionByPeriod'
 import { DocumentData } from 'firebase/firestore'
+import { useSynthesisStore } from '@/stores/synthesisStore'
 
-const { isLoading: isLoadingTransactions, doRequest: getTransactions } = useGetTransactionByPeriod()
+const synthesisStore = useSynthesisStore()
+
+const { isLoading: isLoadingTransactions } = useGetTransactionByPeriod()
 
 const transactions = ref<DocumentData[]>([])
 const items = [[{
@@ -56,11 +59,30 @@ const range = shallowRef<Range>({
 })
 const period = ref<Period>('daily')
 
-onMounted(async () => {
-  transactions.value = await getTransactions({ dateRange: { start: range.value.start, end: range.value.end } })
+// Watch quand le store est initialisé (données Firebase chargées)
+watch(() => synthesisStore.isInitialized, (initialized) => {
+  if (initialized) {
+    synthesisStore.generateTransactionsIteration(
+      synthesisStore.recurringTransactions, 
+      range.value
+    )
+    transactions.value = synthesisStore.transactionsWithIterations
+  }
+}, { immediate: true })
+
+// Watch quand le range change
+watch(range, (newRange) => {
+  if (synthesisStore.isInitialized) {
+    synthesisStore.generateTransactionsIteration(
+      synthesisStore.recurringTransactions, 
+      newRange
+    )
+    transactions.value = synthesisStore.transactionsWithIterations
+  }
 })
 
-watch(range, async (newRange) => {
-  transactions.value = await getTransactions({ dateRange: { start: newRange.start, end: newRange.end } })
+// Watch quand transactionsWithIterations change dans le store
+watch(() => synthesisStore.transactionsWithIterations, (newTransactions) => {
+  transactions.value = newTransactions
 }, { deep: true })
 </script>

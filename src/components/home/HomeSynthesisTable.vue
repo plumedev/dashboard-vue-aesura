@@ -33,6 +33,7 @@ export interface TransactionForTable {
   amount: number
   account: string
   frequency: string
+  iterations: Date[]
 }
 
 const UBadge = resolveComponent('UBadge')
@@ -48,7 +49,8 @@ const convertTransactionsForTable = (transactions: DocumentData[]): TransactionF
       type: transaction.type || '',
       amount: transaction.amount || 0,
       account: transaction.account?.label || '',
-      frequency: transaction.frequency || ''
+      frequency: transaction.frequency || '',
+      iterations: transaction.iterations || []
     }
   })
 }
@@ -236,6 +238,32 @@ const columns: TableColumn<TransactionForTable>[] = [
     }
   },
   {
+    accessorKey: 'iterations',
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted()
+
+      return h(UButton, {
+        color: 'neutral',
+        variant: 'ghost',
+        label: 'Itérations',
+        icon: isSorted
+          ? isSorted === 'asc'
+            ? 'i-lucide-arrow-up-a-z'
+            : 'i-lucide-arrow-down-a-z'
+          : 'i-lucide-arrow-down-up',
+        class: '-mx-2.5',
+        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+      })
+    },
+    cell: ({ row }) => {
+      const iterations = row.getValue('iterations') as Date[]
+      const amount = row.getValue('amount') as number
+
+      const display = `${iterations.length} ( ${iterations.length} x ${amount}€)`
+      return h('div', { class: 'font-medium' }, display)
+    }
+  },
+  {
     accessorKey: 'amount',
     header: ({ column }) => {
       const isSorted = column.getIsSorted()
@@ -257,11 +285,11 @@ const columns: TableColumn<TransactionForTable>[] = [
     },
     cell: ({ row }) => {
       const amount = Number.parseFloat(row.getValue('amount') as string)
-
+      const iterations = row.getValue('iterations') as Date[]
       const formatted = new Intl.NumberFormat('fr-FR', {
         style: 'currency',
         currency: 'EUR'
-      }).format(amount)
+      }).format(amount * iterations.length)
 
       return h('div', { class: 'text-right font-medium' }, formatted)
     }
