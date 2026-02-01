@@ -81,13 +81,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { DateFormatter, getLocalTimeZone, CalendarDate, today } from '@internationalized/date'
-import type { Range } from '../../types'
+import type { DateRange } from '../../types'
 
 const df = new DateFormatter('fr-FR', {
   dateStyle: 'medium'
 })
 
-const selected = defineModel<Range>({ required: true })
+const selected = defineModel<DateRange>({ required: true })
 
 const ranges = [
   { label: 'Ce mois-ci', currentMonth: true },

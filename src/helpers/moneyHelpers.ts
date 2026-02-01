@@ -17,7 +17,8 @@ import Big from 'big.js'
 export function safeAdd(amounts: (number | string | null | undefined)[]): number {
   return amounts
     .reduce((sum, amount) => {
-      if (amount === null || amount === undefined) {
+      // Vérifier si la valeur est valide pour Big.js
+      if (amount === null || amount === undefined || amount === '' || isNaN(Number(amount))) {
         return sum
       }
       // Convertir en Big pour éviter les erreurs de précision
@@ -36,8 +37,13 @@ export function safeAdd(amounts: (number | string | null | undefined)[]): number
  * @example
  * safeSubtract(10.1, 3.2) // 6.9 (au lieu de 6.8999999999999995)
  */
-export function safeSubtract(a: number | string, b: number | string): number {
-  return new Big(a).minus(new Big(b)).toNumber()
+export function safeSubtract(
+  a: number | string | null | undefined,
+  b: number | string | null | undefined
+): number {
+  const valA = a === null || a === undefined || a === '' || isNaN(Number(a)) ? 0 : a
+  const valB = b === null || b === undefined || b === '' || isNaN(Number(b)) ? 0 : b
+  return new Big(valA).minus(new Big(valB)).toNumber()
 }
 
 /**
@@ -47,8 +53,13 @@ export function safeSubtract(a: number | string, b: number | string): number {
  * @param b - Deuxième montant
  * @returns Le produit en tant que number
  */
-export function safeMultiply(a: number | string, b: number | string): number {
-  return new Big(a).times(new Big(b)).toNumber()
+export function safeMultiply(
+  a: number | string | null | undefined,
+  b: number | string | null | undefined
+): number {
+  const valA = a === null || a === undefined || a === '' || isNaN(Number(a)) ? 0 : a
+  const valB = b === null || b === undefined || b === '' || isNaN(Number(b)) ? 0 : b
+  return new Big(valA).times(new Big(valB)).toNumber()
 }
 
 /**
@@ -58,8 +69,14 @@ export function safeMultiply(a: number | string, b: number | string): number {
  * @param b - Diviseur
  * @returns Le quotient en tant que number
  */
-export function safeDivide(a: number | string, b: number | string): number {
-  return new Big(a).div(new Big(b)).toNumber()
+export function safeDivide(
+  a: number | string | null | undefined,
+  b: number | string | null | undefined
+): number {
+  const valA = a === null || a === undefined || a === '' || isNaN(Number(a)) ? 0 : a
+  const valB = b === null || b === undefined || b === '' || isNaN(Number(b)) ? 1 : b // Éviter division par 0
+  if (valB === 0 || valB === '0') return 0
+  return new Big(valA).div(new Big(valB)).toNumber()
 }
 
 /**
