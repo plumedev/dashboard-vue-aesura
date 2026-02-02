@@ -26,7 +26,6 @@
     <template #body>
       <div class="flex flex-col h-full min-h-0">
         <HomeStats :transactions="transactions" :range="range" />
-        <!-- <pre>{{ transactions }}</pre> -->
         <HomeSynthesisTable :period="period" :range="range" :transactions="transactions"
           :is-loading="isLoadingTransactions" />
       </div>
@@ -60,14 +59,12 @@ const range = shallowRef<DateRange>({
 })
 const period = ref<Period>('daily')
 
-// Watch quand le store est initialisé (données Firebase chargées)
 watch(() => synthesisStore.isInitialized, (initialized) => {
   if (initialized) {
     transactions.value = synthesisStore.recurringTransactions
   }
 }, { immediate: true })
 
-// Watch quand recurringTransactions change dans le store
 watch(() => synthesisStore.recurringTransactions, (newTransactions) => {
   transactions.value = newTransactions
 }, { deep: true })

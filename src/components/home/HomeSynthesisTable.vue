@@ -1,13 +1,7 @@
 <template>
   <div class="flex-1 flex flex-col min-h-0 mt-5">
     <UTable :data="data" :columns="columns" :grouping="['transactionId']" :grouping-options="grouping_options"
-      class="flex-1 overflow-auto" :ui="{
-        base: 'table-fixed border-separate border-spacing-0',
-        thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
-        tbody: '[&>tr]:last:[&>td]:border-b-0',
-        th: 'first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
-        td: 'border-b border-default empty:p-0'
-      }">
+      class="flex-1 overflow-auto" :ui="UITableConfig">
       <template #title-cell="{ row }">
         <div v-if="row.getIsGrouped()" class="flex items-center">
           <span class="inline-block" :style="{ width: `calc(${row.depth} * 1rem)` }" />
@@ -21,18 +15,13 @@
         </div>
         <div v-else class="flex items-center group">
           <span class="inline-block" :style="{ width: `calc((${row.depth} + 1) * 1.5rem)` }" />
-          <span class="text-dimmed italic mr-2">Itération du {{ formatDate(row.original.date) }}</span>
+          <span class="text-dimmed italic mr-2">Itération du {{ formatLongDate(row.original.date) }}</span>
         </div>
       </template>
 
       <template #amount-cell="{ row }">
         <div :class="['text-right font-medium', row.getIsGrouped() ? 'text-highlighted font-bold' : '']">
-          <template v-if="row.getIsGrouped()">
-            {{formatCurrency(row.getLeafRows().reduce((acc, r) => acc + (r.original as any).amount, 0))}}
-          </template>
-          <template v-else>
-            {{ formatCurrency(row.getValue('amount')) }}
-          </template>
+          {{ formatMoney(getGroupTotalAmount(row)) }}
         </div>
       </template>
 
@@ -69,7 +58,9 @@ import type { GroupingOptions } from '@tanstack/vue-table'
 import { Timestamp, type DocumentData } from 'firebase/firestore'
 import type { Period, DateRange } from '../../types'
 import { isWithinInterval } from 'date-fns'
-import { toDate } from '@/helpers/dateHelpers'
+import { toDate, formatLongDate } from '@/helpers/dateHelpers'
+import { formatMoney } from '@/helpers/moneyHelpers'
+import { UITableConfig } from '@/config/ui-theme'
 import IterationEditModal from './IterationEditModal.vue'
 
 const UBadge = resolveComponent('UBadge')
@@ -97,14 +88,12 @@ const data = computed<TransactionIteration[]>(() => {
   const flattened: TransactionIteration[] = []
 
   props.transactions.forEach((transaction) => {
-    // Filtrer les itérations si un range est fourni
     const filteredIterations = (transaction.iterations || []).filter((iteration: any) => {
       if (!props.range) return true
       const date = toDate(iteration.date)
       return isWithinInterval(date, { start: props.range.start, end: props.range.end })
     })
 
-    // Ajouter chaque itération filtrée à la liste à plat
     filteredIterations.forEach((iteration: any) => {
       const date = iteration.date instanceof Timestamp ? iteration.date.toDate() : new Date(iteration.date)
       flattened.push({
@@ -155,28 +144,16 @@ const grouping_options = ref<GroupingOptions>({
   getGroupedRowModel: getGroupedRowModel()
 })
 
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR'
-  }).format(value)
-}
-
-const formatDate = (date: Date | string) => {
-  const dateObj = date instanceof Date ? date : new Date(date)
-  return dateObj.toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  })
-}
-
 const isEditModalOpen = ref(false)
 const selectedIteration = ref<TransactionIteration | null>(null)
 
 const openEditModal = (iteration: TransactionIteration) => {
   selectedIteration.value = iteration
   isEditModalOpen.value = true
+}
+
+const getGroupTotalAmount = (row: any) => {
+  return row.getLeafRows().reduce((acc: number, r: any) => acc + (r.original.amount || 0), 0)
 }
 
 const getIterationActions = (iteration: TransactionIteration) => [

@@ -1,28 +1,13 @@
 <template>
-  <UPageGrid
-    class="lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-px w-full flex"
-  >
-    <UPageCard
-      v-for="(stat, index) in stats"
-      :key="index"
-      :icon="stat.icon"
-      :title="stat.title"
-      to="/customers"
-      variant="subtle"
-      :ui="{
-        container: 'gap-y-1.5',
-        wrapper: 'items-start',
-        leading: 'p-2.5 rounded-full bg-primary/10 ring ring-inset ring-primary/25',
-        title: 'font-normal text-muted text-xs uppercase'
-      }"
-      class="lg:rounded-none first:rounded-l-lg last:rounded-r-lg hover:z-1 w-full"
-    >
-      <div
-        class="flex items-center gap-2"
-      >
-        <span
-          class="text-2xl font-semibold text-highlighted"
-        >
+  <UPageGrid class="lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-px w-full flex">
+    <UPageCard v-for="(stat, index) in stats" :key="index" :icon="stat.icon" :title="stat.title" variant="subtle" :ui="{
+      container: 'gap-y-1.5',
+      wrapper: 'items-start',
+      leading: 'p-2.5 rounded-full bg-primary/10 ring ring-inset ring-primary/25',
+      title: 'font-normal text-muted text-xs uppercase'
+    }" class="lg:rounded-none first:rounded-l-lg last:rounded-r-lg hover:z-1 w-full">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl font-semibold text-highlighted">
           {{ formatMoney(stat.value) }}
         </span>
       </div>
@@ -33,7 +18,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { DocumentData } from 'firebase/firestore'
-import { isWithinInterval } from 'date-fns'
+import { isWithinInterval, areIntervalsOverlapping } from 'date-fns'
+import type { IIteration } from '@/shared/interfaces/IIteration'
+import type { IIterationWithContext } from '@/shared/interfaces/IIterationWithContext'
 import type { DateRange } from '../../types'
 import { toDate } from '@/helpers/dateHelpers'
 import { formatMoney, safeAdd, safeSubtract } from '@/helpers/moneyHelpers'
@@ -44,69 +31,63 @@ const props = defineProps<{
 }>()
 
 const filteredIterations = computed(() => {
-  const all: any[] = []
-  
-  props.transactions.forEach(t => {
-    // On vérifie si la transaction possède des itérations CHARGÉES (cas du Dashboard)
-    const iterations = t.iterations || []
-    
+  const iterationsInSelectedDateRange: IIterationWithContext[] = []
+
+  props.transactions.forEach(transaction => {
+    const iterations: IIteration[] = transaction.iterations || []
+
     if (iterations.length > 0) {
-      // Cas avec itérations détaillées
-      iterations.forEach((it: any) => {
-        const date = toDate(it.date)
-        if (!props.range || isWithinInterval(date, { start: props.range.start, end: props.range.end })) {
-          all.push({
-            ...it,
-            type: t.type,
-            amount: Number(it.amount !== undefined ? it.amount : (t.amount || 0))
+      iterations.forEach((iteration: IIteration) => {
+        const date = toDate(iteration.date)
+
+        const isDateInSelectedRange = !props.range || isWithinInterval(date, { start: props.range.start, end: props.range.end })
+
+        if (isDateInSelectedRange) {
+          iterationsInSelectedDateRange.push({
+            ...iteration,
+            date: date,
+            type: transaction.type,
+            amount: Number(iteration.amount)
           })
         }
       })
     } else {
-      // Cas sans itérations CHARGÉES (ex: Page "Mon Mois")
-      // On vérifie si la transaction elle-même est dans la plage de dates
-      const startDate = toDate(t.effectDate)
-      const endDate = t.effectEndDate ? toDate(t.effectEndDate) : null
-      
+
+      const startDate = toDate(transaction.effectDate)
+      const endDate = transaction.effectEndDate ? toDate(transaction.effectEndDate) : new Date(8640000000000000)
+
       let shouldInclude = true
       if (props.range) {
-        // La transaction est incluse si son intervalle [startDate, endDate]
-        // intersecte l'intervalle sélectionné [props.range.start, props.range.end]
-        const rangeStart = props.range.start
-        const rangeEnd = props.range.end
-        
-        const isAfterRange = startDate > rangeEnd
-        const isBeforeRange = endDate ? endDate < rangeStart : false
-        
-        shouldInclude = !isAfterRange && !isBeforeRange
+        shouldInclude = areIntervalsOverlapping(
+          { start: startDate, end: endDate },
+          { start: props.range.start, end: props.range.end }
+        )
       }
 
       if (shouldInclude) {
-        all.push({
-          type: t.type,
-          amount: Number(t.amount || 0)
+        iterationsInSelectedDateRange.push({
+          type: transaction.type,
+          amount: Number(transaction.amount || 0)
         })
       }
     }
   })
-  
-  return all
+
+  return iterationsInSelectedDateRange
 })
 
 const expensesAmount = computed(() => {
   const amounts = filteredIterations.value
-    ?.filter((it) => it.type === 'expense')
-    .map((it) => it.amount)
-    .filter((amount: any) => amount !== null && amount !== undefined && amount !== '' && !isNaN(Number(amount))) || []
+    ?.filter((iteration) => iteration.type === 'expense')
+    .map((iteration) => iteration.amount)
 
   return safeAdd(amounts)
 })
 
 const incomesAmount = computed(() => {
   const amounts = filteredIterations.value
-    ?.filter((it) => it.type === 'income')
-    .map((it) => it.amount)
-    .filter((amount: any) => amount !== null && amount !== undefined && amount !== '' && !isNaN(Number(amount))) || []
+    ?.filter((iteration) => iteration.type === 'income')
+    .map((iteration) => iteration.amount)
 
   return safeAdd(amounts)
 })

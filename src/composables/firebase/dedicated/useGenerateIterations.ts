@@ -4,13 +4,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useToast } from '@nuxt/ui/composables'
 import { addDoc, collection, Timestamp } from 'firebase/firestore'
 
-export interface CreateIterationsParams {
-  transactionId: string
-  startDate?: Date
-  endDate?: Date
-}
-
-export interface CreateIterationParams {
+export interface ICreateIterationParams {
   transactionId: string
   date: Date
   amount: number
@@ -24,7 +18,7 @@ export function useCreateIterations() {
     transactionId,
     date,
     amount,
-  }: CreateIterationParams): Promise<string> => {
+  }: ICreateIterationParams): Promise<string> => {
     try {
       if (!authStore.userId) {
         throw new Error('Vous devez être connecté')

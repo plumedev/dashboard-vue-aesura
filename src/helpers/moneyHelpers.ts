@@ -17,11 +17,9 @@ import Big from 'big.js'
 export function safeAdd(amounts: (number | string | null | undefined)[]): number {
   return amounts
     .reduce((sum, amount) => {
-      // Vérifier si la valeur est valide pour Big.js
       if (amount === null || amount === undefined || amount === '' || isNaN(Number(amount))) {
         return sum
       }
-      // Convertir en Big pour éviter les erreurs de précision
       return sum.plus(new Big(amount))
     }, new Big(0))
     .toNumber()

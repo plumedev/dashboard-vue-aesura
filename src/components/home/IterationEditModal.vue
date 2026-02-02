@@ -118,7 +118,6 @@ const handleSubmit = async () => {
             }
         })
 
-        // Refresh data
         await synthesisStore.getRecurringTransactions()
 
         emit('saved')

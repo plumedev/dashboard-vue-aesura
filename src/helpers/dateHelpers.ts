@@ -96,6 +96,22 @@ export function formatDate(date: Date | Timestamp | string | null | undefined): 
 }
 
 /**
+ * Formate une date en français avec le mois complet.
+ *
+ * @param date - La date à formater (Timestamp, string, Date, null ou undefined)
+ * @returns Une chaîne formatée en français (ex: "15 janvier 2026")
+ */
+export function formatLongDate(date: Date | Timestamp | string | null | undefined): string {
+  const dateObj = toDate(date)
+
+  return dateObj.toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+}
+
+/**
  * Convertit un Timestamp Firestore en CalendarDate.
  *
  * @param timestamp - Le Timestamp à convertir
