@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import { computed, h, ref, resolveComponent } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
-import { Frequency, type Period, type Range } from '../../types'
+import { Frequency, type Period, type DateRange } from '../../types'
 import { DocumentData, Timestamp } from 'firebase/firestore'
 import { formatDate } from '@/helpers/dateHelpers'
 import { useDeleteFireDoc } from '@/composables/firebase/useDeleteFireDoc'
@@ -55,9 +55,9 @@ const convertTransactionsForTable = (transactions: DocumentData[]): TransactionF
 
 const props = defineProps<{
   period?: Period
-  range?: Range
+  range?: DateRange
   transactions: DocumentData[]
-  isLoading: boolean
+  isLoading?: boolean
 }>()
 
 const allTransactions = computed(() => convertTransactionsForTable(props.transactions))

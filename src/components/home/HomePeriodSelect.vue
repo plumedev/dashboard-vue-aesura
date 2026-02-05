@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import { eachDayOfInterval } from 'date-fns'
-import type { Period, Range } from '../../types'
+import type { Period, DateRange } from '../../types'
 
 const model = defineModel<Period>({ required: true })
 
 const props = defineProps<{
-  range: Range
+  range: DateRange
 }>()
 
 const days = computed(() => eachDayOfInterval(props.range))

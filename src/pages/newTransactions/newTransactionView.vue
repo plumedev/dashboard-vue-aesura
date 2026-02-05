@@ -78,10 +78,11 @@ import { onMounted } from 'vue';
 import { DocumentData, Timestamp } from 'firebase/firestore';
 import type { SelectItem } from '@nuxt/ui';
 import type { TabsItem } from '@nuxt/ui';
-import { CalendarDate } from '@internationalized/date'
+import { CalendarDate, getLocalTimeZone } from '@internationalized/date'
 import { useCreateFireDoc } from '@/composables/firebase/useCreateFireDoc';
 import { useUpdateFireDoc } from '@/composables/firebase/useUpdateFireDoc';
 import { calendarDateToTimestamp, timestampToCalendarDate } from '@/helpers/dateHelpers';
+import { useCreateIterations } from '@/composables/firebase/dedicated/useCreateIterations';
 
 export interface TransactionData {
   id: string
@@ -100,6 +101,7 @@ const props = defineProps<{
 
 const { doRequest: createTransaction, isLoading: isCreatingTransaction } = useCreateFireDoc()
 const { doRequest: updateTransaction, isLoading: isUpdatingTransaction } = useUpdateFireDoc()
+const { doRequest: createIterations } = useCreateIterations()
 
 const isSubmitting = computed(() => isCreatingTransaction.value || isUpdatingTransaction.value)
 const isEditMode = computed(() => !!props.transaction)
@@ -219,7 +221,7 @@ const handleSubmit = async () => {
 
   const transactionData = {
     name: formState.value.name,
-    amount: formState.value.amount,
+    amount: Number(formState.value.amount || 0),
     type: formState.value.type,
     account: {
       value: selectedAccount?.id || formState.value.account,
@@ -238,15 +240,25 @@ const handleSubmit = async () => {
     })
     emit('transactionUpdated')
   } else {
-    await createTransaction({
+    const transactionId = await createTransaction({
       collectionName: 'recurringTransactions',
       data: transactionData
     })
+
+    await createIterations({
+      transactionId: transactionId,
+      startDate: formState.value.startDate.toDate(getLocalTimeZone()),
+      endDate: formState.value.endDate.toDate(getLocalTimeZone()),
+      amount: Number(formState.value.amount || 0),
+      name: formState.value.name,
+      type: formState.value.type,
+      frequency: formState.value.frequency
+    })
+
     emit('transactionCreated')
   }
   open.value = false
 }
-
 
 const openModal = () => {
   if (props.transaction) {
@@ -259,7 +271,6 @@ const openModal = () => {
 }
 defineExpose({ openModal })
 
-// Watch si on a une transaction en prop, on initialise le formulaire en modification
 watch(() => props.transaction, (newTransaction) => {
   if (newTransaction) {
     initFormFromTransaction(newTransaction)

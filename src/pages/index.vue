@@ -25,8 +25,8 @@
 
     <template #body>
       <div class="flex flex-col h-full min-h-0">
-        <HomeStats :transactions="transactions" />
-        <HomeTransactionsTable :period="period" :range="range" :transactions="transactions"
+        <HomeStats :transactions="transactions" :range="range" />
+        <HomeSynthesisTable :period="period" :range="range" :transactions="transactions"
           :is-loading="isLoadingTransactions" />
       </div>
     </template>
@@ -37,11 +37,14 @@
 import { onMounted, ref, shallowRef, watch } from 'vue'
 import { sub } from 'date-fns'
 import type { DropdownMenuItem } from '@nuxt/ui'
-import type { Period, Range } from '../types'
+import type { Period, DateRange } from '../types'
 import { useGetTransactionByPeriod } from '@/composables/firebase/dedicated/useGetTransactionByPeriod'
 import { DocumentData } from 'firebase/firestore'
+import { useSynthesisStore } from '@/stores/synthesisStore'
 
-const { isLoading: isLoadingTransactions, doRequest: getTransactions } = useGetTransactionByPeriod()
+const synthesisStore = useSynthesisStore()
+
+const { isLoading: isLoadingTransactions } = useGetTransactionByPeriod()
 
 const transactions = ref<DocumentData[]>([])
 const items = [[{
@@ -50,17 +53,23 @@ const items = [[{
   to: '/new-transaction'
 }]] satisfies DropdownMenuItem[][]
 
-const range = shallowRef<Range>({
+const range = shallowRef<DateRange>({
   start: sub(new Date(), { days: 14 }),
   end: new Date()
 })
 const period = ref<Period>('daily')
 
-onMounted(async () => {
-  transactions.value = await getTransactions({ dateRange: { start: range.value.start, end: range.value.end } })
-})
+watch(() => synthesisStore.isInitialized, (initialized) => {
+  if (initialized) {
+    transactions.value = synthesisStore.recurringTransactions
+  }
+}, { immediate: true })
 
-watch(range, async (newRange) => {
-  transactions.value = await getTransactions({ dateRange: { start: newRange.start, end: newRange.end } })
+watch(() => synthesisStore.recurringTransactions, (newTransactions) => {
+  transactions.value = newTransactions
 }, { deep: true })
+
+onMounted(async () => {
+  await synthesisStore.getRecurringTransactions()
+})
 </script>

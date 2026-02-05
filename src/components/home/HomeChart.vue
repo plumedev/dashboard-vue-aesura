@@ -3,13 +3,13 @@ import { computed, useTemplateRef, ref, watch } from 'vue'
 import { eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval, format } from 'date-fns'
 import { VisXYContainer, VisLine, VisAxis, VisArea, VisCrosshair, VisTooltip } from '@unovis/vue'
 import { useElementSize } from '@vueuse/core'
-import type { Period, Range } from '../../types'
+import type { Period, DateRange } from '../../types'
 
 const cardRef = useTemplateRef<HTMLElement | null>('cardRef')
 
 const props = defineProps<{
   period: Period
-  range: Range
+  range: DateRange
 }>()
 
 type DataRecord = {
