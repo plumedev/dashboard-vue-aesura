@@ -1,6 +1,6 @@
 <template>
   <div class="flex-1 flex flex-col min-h-0 mt-5">
-    <UInput v-model="searchQuery" placeholder="Rechercher une transaction..." icon="i-lucide-search" class="mb-4"
+    <UInput v-model="searchQuery" :placeholder="$t('HomeTransactionsTable.searchPlaceholder')" icon="i-lucide-search" class="mb-4"
       :ui="{ base: 'w-full' }" />
     <UTable sticky loading-animation="carousel" :loading="isLoading" :data="filteredTransactions" :columns="columns"
       class="flex-1 overflow-auto" :ui="{

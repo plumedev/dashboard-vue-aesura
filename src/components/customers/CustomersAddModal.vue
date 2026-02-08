@@ -1,3 +1,48 @@
+<template>
+  <UModal
+    v-model:open="open"
+    :title="$t('CustomersAddModal.title')"
+    :description="$t('CustomersAddModal.description')"
+  >
+    <UButton
+      :label="$t('CustomersAddModal.button')"
+      icon="i-lucide-plus"
+    />
+
+    <template
+      #body
+    >
+      <UForm
+        :schema="schema"
+        :state="state"
+        class="space-y-4"
+        @submit="onSubmit"
+      >
+        <UFormField :label="$t('CustomersAddModal.name')" name="name">
+          <UInput
+            v-model="state.name"
+            :placeholder="$t('CustomersAddModal.placeholderName')"
+            class="w-full"
+          />
+        </UFormField>
+        <UFormField :label="$t('CustomersAddModal.email')" name="email">
+          <UInput
+            v-model="state.email"
+            :placeholder="$t('CustomersAddModal.placeholderEmail')"
+            class="w-full"
+          />
+        </UFormField>
+        <div
+          class="flex justify-end gap-2"
+        >
+          <UButton :label="$t('CustomersAddModal.cancel')" color="neutral" variant="subtle" @click="open = false" />
+          <UButton :label="$t('CustomersAddModal.create')" type="submit" color="primary" />
+        </div>
+      </UForm>
+    </template>
+  </UModal>
+</template>
+
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import * as z from 'zod'
@@ -22,64 +67,3 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   open.value = false
 }
 </script>
-
-<template>
-  <UModal
-    v-model:open="open"
-    title="New customer"
-    description="Add a new customer to the database"
-  >
-    <UButton
-      label="New customer"
-      icon="i-lucide-plus"
-    />
-
-    <template
-      #body
-    >
-      <UForm
-        :schema="schema"
-        :state="state"
-        class="space-y-4"
-        @submit="onSubmit"
-      >
-        <UFormField
-          label="Name"
-          placeholder="John Doe"
-          name="name"
-        >
-          <UInput
-            v-model="state.name"
-            class="w-full"
-          />
-        </UFormField>
-        <UFormField
-          label="Email"
-          placeholder="john.doe@example.com"
-          name="email"
-        >
-          <UInput
-            v-model="state.email"
-            class="w-full"
-          />
-        </UFormField>
-        <div
-          class="flex justify-end gap-2"
-        >
-          <UButton
-            label="Cancel"
-            color="neutral"
-            variant="subtle"
-            @click="open = false"
-          />
-          <UButton
-            label="Create"
-            color="primary"
-            variant="solid"
-            type="submit"
-          />
-        </div>
-      </UForm>
-    </template>
-  </UModal>
-</template>

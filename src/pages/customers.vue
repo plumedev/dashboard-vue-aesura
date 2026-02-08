@@ -213,7 +213,7 @@ const pagination = ref({
       #header
     >
       <UDashboardNavbar
-        title="Customers"
+        :title="$t('CustomersPage.title')"
       >
         <template
           #leading

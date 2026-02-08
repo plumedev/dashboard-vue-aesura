@@ -27,8 +27,8 @@ const validate = (state: Partial<PasswordSchema>): FormError[] => {
 
 <template>
   <UPageCard
-    title="Password"
-    description="Confirm your current password before setting a new one."
+    :title="$t('SettingsSecurity.passwordTitle')"
+    :description="$t('SettingsSecurity.passwordDesc')"
     variant="subtle"
   >
     <UForm
@@ -43,7 +43,7 @@ const validate = (state: Partial<PasswordSchema>): FormError[] => {
         <UInput
           v-model="password.current"
           type="password"
-          placeholder="Current password"
+          :placeholder="$t('SettingsSecurity.currentPasswordPlaceholder')"
           class="w-full"
         />
       </UFormField>
@@ -54,13 +54,13 @@ const validate = (state: Partial<PasswordSchema>): FormError[] => {
         <UInput
           v-model="password.new"
           type="password"
-          placeholder="New password"
+          :placeholder="$t('SettingsSecurity.newPasswordPlaceholder')"
           class="w-full"
         />
       </UFormField>
 
       <UButton
-        label="Update"
+        :label="$t('SettingsSecurity.update')"
         class="w-fit"
         type="submit"
       />
@@ -68,15 +68,15 @@ const validate = (state: Partial<PasswordSchema>): FormError[] => {
   </UPageCard>
 
   <UPageCard
-    title="Account"
-    description="No longer want to use our service? You can delete your account here. This action is not reversible. All information related to this account will be deleted permanently."
+    :title="$t('SettingsSecurity.accountTitle')"
+    :description="$t('SettingsSecurity.accountDesc')"
     class="bg-gradient-to-tl from-error/10 from-5% to-default"
   >
     <template
       #footer
     >
       <UButton
-        label="Delete account"
+        :label="$t('SettingsSecurity.deleteAccount')"
         color="error"
       />
     </template>

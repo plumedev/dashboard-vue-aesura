@@ -9,9 +9,9 @@
         </h2>
         <UForm>
           <UAlert v-if="!accounts.length" color="warning" variant="subtle" class="mb-4"
-            title="Il semblrait que tout ne soit pas prêt" icon="i-lucide-octagon-alert">
+            :title="$t('NewTransactionPage.notReadyTitle')" icon="i-lucide-octagon-alert">
             <template #description>
-              Il semblerait que vous n'ayez pas encore de compte. <br>
+              {{ $t('NewTransactionPage.noAccount') }} <br>
               Rendez-vous dans l'onglet 'Comptes' pour en créer un.
             </template>
           </UAlert>

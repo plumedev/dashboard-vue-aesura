@@ -30,7 +30,7 @@
         <template
           v-else
         >
-          Pick a date
+          {{ $t('DateRangePicker.pickDate') }}
         </template>
       </span>
 
@@ -82,6 +82,9 @@
 import { computed } from 'vue'
 import { DateFormatter, getLocalTimeZone, CalendarDate, today } from '@internationalized/date'
 import type { DateRange } from '../../types'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const df = new DateFormatter('fr-FR', {
   dateStyle: 'medium'
@@ -89,15 +92,15 @@ const df = new DateFormatter('fr-FR', {
 
 const selected = defineModel<DateRange>({ required: true })
 
-const ranges = [
-  { label: 'Ce mois-ci', currentMonth: true },
-  { label: '7 derniers jours', days: 7 },
-  { label: '14 derniers jours', days: 14 },
-  { label: '30 derniers jours', days: 30 },
-  { label: '3 derniers mois', months: 3 },
-  { label: '6 derniers mois', months: 6 },
-  { label: '1 an', years: 1 }
-]
+const ranges = computed(() => [
+  { label: t('DateRangePicker.currentMonth'), currentMonth: true },
+  { label: t('DateRangePicker.last7Days'), days: 7 },
+  { label: t('DateRangePicker.last14Days'), days: 14 },
+  { label: t('DateRangePicker.last30Days'), days: 30 },
+  { label: t('DateRangePicker.last3Months'), months: 3 },
+  { label: t('DateRangePicker.last6Months'), months: 6 },
+  { label: t('DateRangePicker.last1Year'), years: 1 }
+])
 
 const toCalendarDate = (date: Date) => {
   return new CalendarDate(

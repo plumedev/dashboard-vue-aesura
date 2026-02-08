@@ -2,22 +2,22 @@
     <UModal v-model:open="isOpen">
         <template #content>
             <UCard>
-                <h2 class="text-2xl font-bold mb-4">Modifier l'itération</h2>
+                <h2 class="text-2xl font-bold mb-4">{{ $t('IterationEditModal.title') }}</h2>
                 <UForm :state="formState" @submit="handleSubmit">
                     <div class="grid grid-cols-1 gap-4">
-                        <UFormField label="Nom" name="name">
+                        <UFormField :label="$t('IterationEditModal.name')" name="name">
                             <UInput v-model="formState.name" class="w-full" />
                         </UFormField>
 
-                        <UFormField label="Montant" name="amount">
+                        <UFormField :label="$t('IterationEditModal.amount')" name="amount">
                             <UInput v-model="formState.amount" type="number" step="0.01" class="w-full" />
                         </UFormField>
 
-                        <UFormField label="Type" name="type">
+                        <UFormField :label="$t('IterationEditModal.type')" name="type">
                             <USelect v-model="formState.type" :items="typeOptions" class="w-full" />
                         </UFormField>
 
-                        <UFormField label="Date" name="date">
+                        <UFormField :label="$t('IterationEditModal.date')" name="date">
                             <UInputDate v-model="dateValue" class="w-full">
                                 <template #trailing>
                                     <UPopover>

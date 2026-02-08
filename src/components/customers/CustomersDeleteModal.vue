@@ -1,3 +1,36 @@
+<template>
+  <UModal
+    v-model:open="open"
+    :title="`Delete ${count} customer${count > 1 ? 's' : ''}?`"
+    :description="$t('CustomersDeleteModal.description')"
+    :ui="{ description: 'text-neutral-500 dark:text-neutral-400' }"
+  >
+    <slot />
+
+    <template
+      #body
+    >
+      <div
+        class="flex justify-end gap-2"
+      >
+        <UButton
+          :label="$t('CustomersDeleteModal.cancel')"
+          color="neutral"
+          variant="subtle"
+          @click="open = false"
+        />
+        <UButton
+          :label="$t('CustomersDeleteModal.delete')"
+          color="error"
+          variant="solid"
+          loading-auto
+          @click="onSubmit"
+        />
+      </div>
+    </template>
+  </UModal>
+</template>
+
 <script setup lang="ts">
 import { ref } from 'vue'
 
@@ -15,34 +48,3 @@ async function onSubmit() {
 }
 </script>
 
-<template>
-  <UModal
-    v-model:open="open"
-    :title="`Delete ${count} customer${count > 1 ? 's' : ''}`"
-    :description="`Are you sure, this action cannot be undone.`"
-  >
-    <slot />
-
-    <template
-      #body
-    >
-      <div
-        class="flex justify-end gap-2"
-      >
-        <UButton
-          label="Cancel"
-          color="neutral"
-          variant="subtle"
-          @click="open = false"
-        />
-        <UButton
-          label="Delete"
-          color="error"
-          variant="solid"
-          loading-auto
-          @click="onSubmit"
-        />
-      </div>
-    </template>
-  </UModal>
-</template>

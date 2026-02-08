@@ -1,6 +1,6 @@
 <template>
   <div class="flex-1 flex flex-col min-h-0 mt-5">
-     <UInput v-model="searchQuery" placeholder="Rechercher une transaction..." icon="i-lucide-search" class="mb-4"
+     <UInput v-model="searchQuery" :placeholder="$t('HomeSynthesisTable.searchPlaceholder')" icon="i-lucide-search" class="mb-4"
       :ui="{ base: 'w-full' }" />
     <UTable :data="filteredTransactions" :columns="columns" :grouping="['transactionId']" :grouping-options="grouping_options"
       class="flex-1 overflow-auto" :ui="UITableConfig">
@@ -17,7 +17,7 @@
         </div>
         <div v-else class="flex items-center group">
           <span class="inline-block" :style="{ width: `calc((${row.depth} + 1) * 1.5rem)` }" />
-          <span class="text-dimmed italic mr-2">Itération du {{ formatLongDate(row.original.date) }}</span>
+          <span class="text-dimmed italic mr-2">{{ $t('HomeSynthesisTable.iterationOf', { date: formatLongDate(row.original.date) }) }}</span>
         </div>
       </template>
 

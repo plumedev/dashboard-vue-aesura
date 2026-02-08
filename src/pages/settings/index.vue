@@ -56,15 +56,15 @@ function onFileClick() {
     @submit="onSubmit"
   >
     <UPageCard
-      title="Profile"
-      description="These informations will be displayed publicly."
+      :title="$t('SettingsProfile.title')"
+      :description="$t('SettingsProfile.description')"
       variant="naked"
       orientation="horizontal"
       class="mb-4"
     >
       <UButton
         form="settings"
-        label="Save changes"
+        :label="$t('SettingsProfile.saveChanges')"
         color="neutral"
         type="submit"
         class="w-fit lg:ms-auto"
@@ -76,8 +76,8 @@ function onFileClick() {
     >
       <UFormField
         name="name"
-        label="Name"
-        description="Will appear on receipts, invoices, and other communication."
+        :label="$t('SettingsProfile.name')"
+        :description="$t('SettingsProfile.nameDesc')"
         required
         class="flex max-sm:flex-col justify-between items-start gap-4"
       >
@@ -89,8 +89,8 @@ function onFileClick() {
       <USeparator />
       <UFormField
         name="email"
-        label="Email"
-        description="Used to sign in, for email receipts and product updates."
+        :label="$t('SettingsProfile.email')"
+        :description="$t('SettingsProfile.emailDesc')"
         required
         class="flex max-sm:flex-col justify-between items-start gap-4"
       >
@@ -103,8 +103,8 @@ function onFileClick() {
       <USeparator />
       <UFormField
         name="username"
-        label="Username"
-        description="Your unique username for logging in and your profile URL."
+        :label="$t('SettingsProfile.username')"
+        :description="$t('SettingsProfile.usernameDesc')"
         required
         class="flex max-sm:flex-col justify-between items-start gap-4"
       >
@@ -117,7 +117,7 @@ function onFileClick() {
       <USeparator />
       <UFormField
         name="avatar"
-        label="Avatar"
+        :label="$t('SettingsProfile.avatar')"
         description="JPG, GIF or PNG. 1MB Max."
         class="flex max-sm:flex-col justify-between sm:items-center gap-4"
       >
@@ -130,7 +130,7 @@ function onFileClick() {
             size="lg"
           />
           <UButton
-            label="Choose"
+            :label="$t('SettingsProfile.choose')"
             color="neutral"
             @click="onFileClick"
           />
@@ -146,8 +146,8 @@ function onFileClick() {
       <USeparator />
       <UFormField
         name="bio"
-        label="Bio"
-        description="Brief description for your profile. URLs are hyperlinked."
+        :label="$t('SettingsProfile.bio')"
+        :description="$t('SettingsProfile.bioDesc')"
         class="flex max-sm:flex-col justify-between items-start gap-4"
         :ui="{ container: 'w-full' }"
       >

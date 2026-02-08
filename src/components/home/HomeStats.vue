@@ -24,6 +24,9 @@ import type { IIterationWithContext } from '@/shared/interfaces/IIterationWithCo
 import type { DateRange } from '../../types'
 import { toDate } from '@/helpers/dateHelpers'
 import { formatMoney, safeAdd, safeSubtract } from '@/helpers/moneyHelpers'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n() 
 
 const props = defineProps<{
   transactions: DocumentData[]
@@ -98,17 +101,17 @@ const balanceAmount = computed(() => {
 
 const stats = computed(() => [
   {
-    title: 'Dépenses',
+    title: t('HomeStats.expenses'),
     icon: 'i-lucide-arrow-down-left',
     value: expensesAmount.value
   },
   {
-    title: 'Revenus',
+    title: t('HomeStats.incomes'),
     icon: 'i-lucide-arrow-up-right',
     value: incomesAmount.value
   },
   {
-    title: 'Solde',
+    title: t('HomeStats.balance'),
     icon: 'i-lucide-arrow-up-right',
     value: balanceAmount.value
   }

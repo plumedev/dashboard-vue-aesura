@@ -1,0 +1,100 @@
+{
+  "AppLogo": {
+    "logo": "Aesura",
+    "logoCollapsed": "A"
+  },
+  "CustomersAddModal": {
+    "title": "New customer",
+    "description": "Add a new customer to the database",
+    "label": "New customer",
+    "name": "Name",
+    "email": "Email",
+    "cancel": "Cancel",
+    "create": "Create",
+    "placeholderName": "John Doe",
+    "placeholderEmail": "john.doe@example.com",
+    "button": "New customer"
+  },
+  "CustomersDeleteModal": {
+    "description": "Are you sure, this action cannot be undone.",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "HomeChart": {
+    "revenue": "Revenue"
+  },
+  "HomeStats": {
+    "expenses": "Dépenses",
+    "incomes": "Revenus",
+    "balance": "Solde"
+  },
+  "HomeSynthesisTable": {
+    "searchPlaceholder": "Rechercher une transaction...",
+    "iterationOf": "Itération du {date}"
+  },
+  "HomeTransactionsTable": {
+    "searchPlaceholder": "Rechercher une transaction..."
+  },
+  "IterationEditModal": {
+    "title": "Modifier l'itération",
+    "name": "Nom",
+    "amount": "Montant",
+    "type": "Type",
+    "date": "Date"
+  },
+  "CustomersPage": {
+    "title": "Customers"
+  },
+  "HomePage": {
+    "title": "Home"
+  },
+  "LoginView": {
+    "title": "Connexion",
+    "subtitle": "Connectez-vous avec votre compte Google"
+  },
+  "MyMonthPage": {
+    "title": "Home"
+  },
+  "NewTransactionPage": {
+    "noAccount": "Il semblerait que vous n'ayez pas encore de compte.",
+    "notReadyTitle": "Il semblerait que tout ne soit pas prêt"
+  },
+  "SettingsPage": {
+    "title": "Settings"
+  },
+  "SettingsProfile": {
+    "title": "Profile",
+    "description": "These informations will be displayed publicly.",
+    "saveChanges": "Save changes",
+    "name": "Name",
+    "email": "Email",
+    "username": "Username",
+    "avatar": "Avatar",
+    "choose": "Choose",
+    "bio": "Bio",
+    "nameDesc": "Will appear on receipts, invoices, and other communication.",
+    "emailDesc": "Used to sign in, for email receipts and product updates.",
+    "usernameDesc": "Your unique username for logging in and your profile URL.",
+    "bioDesc": "Brief description for your profile. URLs are hyperlinked."
+  },
+  "SettingsSecurity": {
+    "passwordTitle": "Password",
+    "passwordDesc": "Confirm your current password before setting a new one.",
+    "currentPasswordPlaceholder": "Current password",
+    "newPasswordPlaceholder": "New password",
+    "update": "Update",
+    "accountTitle": "Account",
+    "accountDesc": "No longer want to use our service? You can delete your account here. This action is not reversible. All information related to this account will be deleted permanently.",
+    "deleteAccount": "Delete account"
+  },
+  "DateRangePicker": {
+    "currentMonth": "Ce mois-ci",
+    "last7Days": "7 derniers jours",
+    "last14Days": "14 derniers jours",
+    "last30Days": "30 derniers jours",
+    "last3Months": "3 derniers mois",
+    "last6Months": "6 derniers mois",
+    "last1Year": "1 an",
+    "pickDate": "Choisir une date"
+  }
+}
