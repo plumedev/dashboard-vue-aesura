@@ -11,12 +11,12 @@
         <h2
           class="text-2xl font-bold text-center"
         >
-          Connexion
+          {{ $t('LoginView.title') }}
         </h2>
         <p
           class="text-sm text-gray-500 dark:text-gray-400 text-center mt-2"
         >
-          Connectez-vous avec votre compte Google
+          {{ $t('LoginView.subtitle') }}
         </p>
       </template>
 

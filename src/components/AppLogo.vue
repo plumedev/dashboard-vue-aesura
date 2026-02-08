@@ -3,13 +3,13 @@
     v-if="!collapsed"
     class="text-2xl font-bold w-full"
   >
-    Aesura
+    {{ $t('AppLogo.logo') }}
   </div>
   <div
     v-else
     class="text-2xl font-bold text-center w-full"
   >
-    A
+    {{ $t('AppLogo.logoCollapsed') }}
   </div>
 </template>
 

@@ -72,7 +72,7 @@ const template = (d: DataRecord) => `${formatDate(d.date)}: ${formatNumber(d.amo
         <p
           class="text-xs text-muted uppercase mb-1.5"
         >
-          Revenue
+          {{ $t('HomeChart.revenue') }}
         </p>
         <p
           class="text-3xl text-highlighted font-semibold"
