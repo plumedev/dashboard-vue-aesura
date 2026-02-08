@@ -1,6 +1,8 @@
 <template>
   <div class="flex-1 flex flex-col min-h-0 mt-5">
-    <UTable :data="data" :columns="columns" :grouping="['transactionId']" :grouping-options="grouping_options"
+     <UInput v-model="searchQuery" placeholder="Rechercher une transaction..." icon="i-lucide-search" class="mb-4"
+      :ui="{ base: 'w-full' }" />
+    <UTable :data="filteredTransactions" :columns="columns" :grouping="['transactionId']" :grouping-options="grouping_options"
       class="flex-1 overflow-auto" :ui="UITableConfig">
       <template #title-cell="{ row }">
         <div v-if="row.getIsGrouped()" class="flex items-center">
@@ -66,6 +68,8 @@ import IterationEditModal from './IterationEditModal.vue'
 const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
+
+const searchQuery = ref('')
 
 const props = defineProps<{
   period?: Period
@@ -167,4 +171,31 @@ const getIterationActions = (iteration: TransactionIteration) => [
     onSelect: () => openEditModal(iteration)
   }]
 ]
+
+const filteredTransactions = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return data.value
+  }
+
+  const query = searchQuery.value.toLowerCase().trim()
+
+  return data.value.filter((iteration) => {
+    const labelMatch = iteration.name.toLowerCase().includes(query)
+
+    const typeLabel = iteration.type === 'expense' ? 'dépense' : iteration.type === 'income' ? 'revenu' : iteration.type
+    const typeMatch = typeLabel.toLowerCase().includes(query)
+    const accountMatch = iteration.account.toLowerCase().includes(query)
+
+    const formattedAmount = new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'EUR'
+    }).format(iteration.amount)
+    const amountMatch = formattedAmount.toLowerCase().includes(query) || iteration.amount.toString().includes(query)
+
+    const formattedDate = formatLongDate(iteration.date)
+    const dateMatch = formattedDate.toLowerCase().includes(query)
+
+    return labelMatch || typeMatch || accountMatch || amountMatch || dateMatch
+  })
+})
 </script>
