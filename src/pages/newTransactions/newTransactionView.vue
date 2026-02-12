@@ -64,7 +64,8 @@
                 label="Date de fin" />
             </UFormField>
           </div>
-          <UButton :label="isEditMode ? 'Modifier' : 'Ajouter'" color="primary" @click="handleSubmit" :loading="isSubmitting" />
+          <UButton :label="isEditMode ? 'Modifier' : 'Ajouter'" color="primary" @click="handleSubmit"
+            :loading="isSubmitting" />
         </UForm>
       </UCard>
     </template>
@@ -204,14 +205,14 @@ const initFormFromTransaction = (transaction: TransactionData) => {
     endDate: timestampToCalendarDate(transaction.effectEndDate),
     type: transaction.type
   }
-  
+
 
   const startDate = timestampToCalendarDate(transaction.effectDate)
   const endDate = timestampToCalendarDate(transaction.effectEndDate)
-  
+
   singleDate.value = startDate
   rangeDate.value = { start: startDate, end: endDate }
-  
+
   isRangeMode.value = startDate.compare(endDate) !== 0
 }
 
@@ -285,6 +286,36 @@ watch(rangeDate, (newValue) => {
 watch(singleDate, (newValue) => {
   formState.value.startDate = newValue
   formState.value.endDate = newValue
+})
+
+watch(() => formState.value.frequency, (newFrequency) => {
+  const today = new Date()
+  const start = new CalendarDate(today.getFullYear(), today.getMonth() + 1, today.getDate())
+  let endDate = new Date(today)
+
+  if (newFrequency !== 'once') {
+    isRangeMode.value = true
+  }
+
+  switch (newFrequency) {
+    case 'monthly':
+      endDate.setMonth(endDate.getMonth() + 1)
+      break
+    case 'quarterly':
+      endDate.setMonth(endDate.getMonth() + 3)
+      break
+    case 'yearly':
+      endDate.setFullYear(endDate.getFullYear() + 1)
+      break
+    case 'once':
+    default:
+      singleDate.value = start
+      break
+  }
+
+  const end = new CalendarDate(endDate.getFullYear(), endDate.getMonth() + 1, endDate.getDate())
+
+  rangeDate.value = { start, end }
 })
 
 onMounted(async () => {
