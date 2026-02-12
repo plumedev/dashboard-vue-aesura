@@ -65,7 +65,7 @@
             </UFormField>
           </div>
           <UButton :label="isEditMode ? 'Modifier' : 'Ajouter'" color="primary" @click="handleSubmit"
-            :loading="isSubmitting" />
+            :loading="isSubmitting" :disabled="!isFormValid" />
         </UForm>
       </UCard>
     </template>
@@ -106,6 +106,17 @@ const { doRequest: createIterations } = useCreateIterations()
 
 const isSubmitting = computed(() => isCreatingTransaction.value || isUpdatingTransaction.value)
 const isEditMode = computed(() => !!props.transaction)
+
+const isFormValid = computed(() => {
+  const isNameValid = formState.value.name.trim() !== ''
+  const isAmountValid = (formState.value.amount ?? 0) > 0
+  const isAccountValid = formState.value.account !== ''
+  const isTypeValid = !!formState.value.type
+  const isFrequencyValid = !!formState.value.frequency
+  const isStartDateValid = !!formState.value.startDate
+
+  return isNameValid && isAmountValid && isAccountValid && isTypeValid && isFrequencyValid && isStartDateValid
+})
 
 interface FormState {
   name: string
