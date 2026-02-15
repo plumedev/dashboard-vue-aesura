@@ -16,8 +16,6 @@
       <UDashboardToolbar>
         <template #left>
           <HomeDateRangePicker v-model="range" class="-ms-1" />
-
-          <HomePeriodSelect v-model="period" :range="range" />
         </template>
       </UDashboardToolbar>
     </template>
