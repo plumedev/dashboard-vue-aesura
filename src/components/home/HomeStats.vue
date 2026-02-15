@@ -5,7 +5,12 @@
       wrapper: 'items-start',
       leading: 'hidden sm:block p-2.5 rounded-full bg-primary/10 ring ring-inset ring-primary/25',
       title: 'font-normal text-muted text-xs uppercase'
-    }" class="rounded-lg lg:rounded-none lg:first:rounded-l-lg lg:last:rounded-r-lg hover:z-1 w-full">
+    }" 
+    :class="[
+      'rounded-lg lg:rounded-none lg:first:rounded-l-lg lg:last:rounded-r-lg hover:z-1 w-full lg:bg-transparent lg:ring-1 lg:ring-gray-200 dark:lg:ring-gray-800',
+      stat.color,
+      stat.borderColor
+    ]">
       <div class="flex items-center gap-2">
         <span class="text-2xl font-semibold text-highlighted">
           {{ formatMoney(stat.value) }}
@@ -103,17 +108,23 @@ const stats = computed(() => [
   {
     title: t('HomeStats.expenses'),
     icon: 'i-lucide-arrow-down-left',
-    value: expensesAmount.value
+    value: expensesAmount.value,
+    color: 'bg-red-500/10 dark:bg-red-500/10',
+    borderColor: 'ring-1 ring-red-500/25 dark:ring-red-500/25'
   },
   {
     title: t('HomeStats.incomes'),
     icon: 'i-lucide-arrow-up-right',
-    value: incomesAmount.value
+    value: incomesAmount.value,
+    color: 'bg-emerald-500/10 dark:bg-emerald-500/10',
+    borderColor: 'ring-1 ring-emerald-500/25 dark:ring-emerald-500/25'
   },
   {
     title: t('HomeStats.balance'),
     icon: 'i-lucide-arrow-up-right',
-    value: balanceAmount.value
+    value: balanceAmount.value,
+    color: '',
+    borderColor: ''
   }
 ])
 
