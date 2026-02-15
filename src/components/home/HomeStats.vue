@@ -7,7 +7,7 @@
       title: 'font-normal text-muted text-xs uppercase'
     }" 
     :class="[
-      'rounded-lg lg:rounded-none lg:first:rounded-l-lg lg:last:rounded-r-lg hover:z-1 w-full lg:bg-transparent lg:ring-1 lg:ring-gray-200 dark:lg:ring-gray-800',
+      'rounded-lg lg:rounded-none lg:first:rounded-l-lg lg:last:rounded-r-lg hover:z-1 w-full',
       stat.color,
       stat.borderColor
     ]">
@@ -109,15 +109,15 @@ const stats = computed(() => [
     title: t('HomeStats.expenses'),
     icon: 'i-lucide-arrow-down-left',
     value: expensesAmount.value,
-    color: 'bg-red-500/10 dark:bg-red-500/10',
-    borderColor: 'ring-1 ring-red-500/25 dark:ring-red-500/25'
+    color: 'max-lg:bg-red-500/10 dark:max-lg:bg-red-500/10',
+    borderColor: 'max-lg:ring-1 max-lg:ring-red-500/25 dark:max-lg:ring-red-500/25'
   },
   {
     title: t('HomeStats.incomes'),
     icon: 'i-lucide-arrow-up-right',
     value: incomesAmount.value,
-    color: 'bg-emerald-500/10 dark:bg-emerald-500/10',
-    borderColor: 'ring-1 ring-emerald-500/25 dark:ring-emerald-500/25'
+    color: 'max-lg:bg-emerald-500/10 dark:max-lg:bg-emerald-500/10',
+    borderColor: 'max-lg:ring-1 max-lg:ring-emerald-500/25 dark:max-lg:ring-emerald-500/25'
   },
   {
     title: t('HomeStats.balance'),
