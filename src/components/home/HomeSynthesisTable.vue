@@ -23,7 +23,7 @@
 
       <template #amount-cell="{ row }">
         <div :class="['text-right font-medium', row.getIsGrouped() ? 'text-highlighted font-bold' : '']">
-          {{ formatMoney(getGroupTotalAmount(row)) }}
+          {{ row.getIsGrouped() ? formatMoney(getGroupTotalAmount(row)) : formatMoney(Number(row.getValue('amount'))) }}
         </div>
       </template>
 
