@@ -89,12 +89,13 @@
   },
   "DateRangePicker": {
     "currentMonth": "Ce mois-ci",
-    "last7Days": "7 derniers jours",
-    "last14Days": "14 derniers jours",
-    "last30Days": "30 derniers jours",
-    "last3Months": "3 derniers mois",
-    "last6Months": "6 derniers mois",
-    "last1Year": "1 an",
+    "currentYear": "Cette année",
+    "last7Days": "7 prochains jours",
+    "last14Days": "14 prochains jours",
+    "last30Days": "30 prochains jours",
+    "last3Months": "3 prochains mois",
+    "last6Months": "6 prochains mois",
+    "last1Year": "Année à venir",
     "pickDate": "Choisir une date"
   }
 }

@@ -94,6 +94,7 @@ const selected = defineModel<DateRange>({ required: true })
 
 const ranges = computed(() => [
   { label: t('DateRangePicker.currentMonth'), currentMonth: true },
+  { label: t('DateRangePicker.currentYear'), currentYear: true },
   { label: t('DateRangePicker.last7Days'), days: 7 },
   { label: t('DateRangePicker.last14Days'), days: 14 },
   { label: t('DateRangePicker.last30Days'), days: 30 },
@@ -123,7 +124,7 @@ const calendarRange = computed({
   }
 })
 
-const isRangeSelected = (range: { days?: number, months?: number, years?: number, currentMonth?: boolean }) => {
+const isRangeSelected = (range: { days?: number, months?: number, years?: number, currentMonth?: boolean, currentYear?: boolean }) => {
   if (!selected.value.start || !selected.value.end) return false
 
   const currentDate = today(getLocalTimeZone())
@@ -135,15 +136,18 @@ const isRangeSelected = (range: { days?: number, months?: number, years?: number
     startDate = new CalendarDate(currentDate.year, currentDate.month, 1)
 
     endDate = new CalendarDate(currentDate.year, currentDate.month, currentDate.calendar.getDaysInMonth(currentDate))
+  } else if (range.currentYear) {
+    startDate = new CalendarDate(currentDate.year, 1, 1)
+    endDate = new CalendarDate(currentDate.year, 12, 31)
   } else {
-    endDate = currentDate.copy()
-    startDate = endDate.copy()
+    startDate = currentDate.copy()
+    endDate = startDate.copy()
     if (range.days) {
-      startDate = startDate.subtract({ days: range.days })
+      endDate = endDate.add({ days: range.days })
     } else if (range.months) {
-      startDate = startDate.subtract({ months: range.months })
+      endDate = endDate.add({ months: range.months })
     } else if (range.years) {
-      startDate = startDate.subtract({ years: range.years })
+      endDate = endDate.add({ years: range.years })
     }
   }
 
@@ -153,7 +157,7 @@ const isRangeSelected = (range: { days?: number, months?: number, years?: number
   return selectedStart.compare(startDate) === 0 && selectedEnd.compare(endDate) === 0
 }
 
-const selectRange = (range: { days?: number, months?: number, years?: number, currentMonth?: boolean }) => {
+const selectRange = (range: { days?: number, months?: number, years?: number, currentMonth?: boolean, currentYear?: boolean }) => {
   const currentDate = today(getLocalTimeZone())
   let startDate: CalendarDate
   let endDate: CalendarDate
@@ -163,15 +167,18 @@ const selectRange = (range: { days?: number, months?: number, years?: number, cu
     startDate = new CalendarDate(currentDate.year, currentDate.month, 1)
 
     endDate = new CalendarDate(currentDate.year, currentDate.month, currentDate.calendar.getDaysInMonth(currentDate))
+  } else if (range.currentYear) {
+    startDate = new CalendarDate(currentDate.year, 1, 1)
+    endDate = new CalendarDate(currentDate.year, 12, 31)
   } else {
-    endDate = currentDate.copy()
-    startDate = endDate.copy()
+    startDate = currentDate.copy()
+    endDate = startDate.copy()
     if (range.days) {
-      startDate = startDate.subtract({ days: range.days })
+      endDate = endDate.add({ days: range.days })
     } else if (range.months) {
-      startDate = startDate.subtract({ months: range.months })
+      endDate = endDate.add({ months: range.months })
     } else if (range.years) {
-      startDate = startDate.subtract({ years: range.years })
+      endDate = endDate.add({ years: range.years })
     }
   }
 

@@ -34,7 +34,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref, shallowRef, watch } from 'vue'
-import { sub } from 'date-fns'
+import { startOfMonth, endOfMonth } from 'date-fns'
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Period, DateRange } from '../types'
 import { useGetTransactionByPeriod } from '@/composables/firebase/dedicated/useGetTransactionByPeriod'
@@ -53,8 +53,8 @@ const items = [[{
 }]] satisfies DropdownMenuItem[][]
 
 const range = shallowRef<DateRange>({
-  start: sub(new Date(), { days: 14 }),
-  end: new Date()
+  start: startOfMonth(new Date()),
+  end: endOfMonth(new Date())
 })
 const period = ref<Period>('daily')
 
