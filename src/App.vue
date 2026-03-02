@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import type { NavigationMenuItem } from '@nuxt/ui'
+import { fr } from '@nuxt/ui/locale'
 import RouteName from '@/router/RouteName'
 
 const toast = useToast()
@@ -97,7 +98,7 @@ if (cookie.value !== 'accepted') {
 
 <template>
   <Suspense>
-    <UApp>
+    <UApp :locale="fr">
       <template v-if="isLoginPage">
         <RouterView />
       </template>
