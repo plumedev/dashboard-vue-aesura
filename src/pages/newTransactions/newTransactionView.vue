@@ -84,6 +84,7 @@ import { useCreateFireDoc } from '@/composables/firebase/useCreateFireDoc';
 import { useUpdateFireDoc } from '@/composables/firebase/useUpdateFireDoc';
 import { calendarDateToTimestamp, timestampToCalendarDate } from '@/helpers/dateHelpers';
 import { useCreateIterations } from '@/composables/firebase/dedicated/useCreateIterations';
+import { useUpdateFutureIterations } from '@/composables/firebase/dedicated/useUpdateFutureIterations';
 
 export interface TransactionData {
   id: string
@@ -103,8 +104,9 @@ const props = defineProps<{
 const { doRequest: createTransaction, isLoading: isCreatingTransaction } = useCreateFireDoc()
 const { doRequest: updateTransaction, isLoading: isUpdatingTransaction } = useUpdateFireDoc()
 const { doRequest: createIterations } = useCreateIterations()
+const { doRequest: updateFutureIterations, isLoading: isUpdatingFutureIterations } = useUpdateFutureIterations()
 
-const isSubmitting = computed(() => isCreatingTransaction.value || isUpdatingTransaction.value)
+const isSubmitting = computed(() => isCreatingTransaction.value || isUpdatingTransaction.value || isUpdatingFutureIterations.value)
 const isEditMode = computed(() => !!props.transaction)
 
 const isFormValid = computed(() => {
@@ -206,7 +208,11 @@ const getDefaultFormState = (): FormState => ({
 const formState = ref<FormState>(getDefaultFormState())
 
 
+const isInitializing = ref(false)
+
 const initFormFromTransaction = (transaction: TransactionData) => {
+  isInitializing.value = true
+
   formState.value = {
     name: transaction.name,
     amount: transaction.amount,
@@ -217,7 +223,6 @@ const initFormFromTransaction = (transaction: TransactionData) => {
     type: transaction.type
   }
 
-
   const startDate = timestampToCalendarDate(transaction.effectDate)
   const endDate = timestampToCalendarDate(transaction.effectEndDate)
 
@@ -225,6 +230,10 @@ const initFormFromTransaction = (transaction: TransactionData) => {
   rangeDate.value = { start: startDate, end: endDate }
 
   isRangeMode.value = startDate.compare(endDate) !== 0
+
+  setTimeout(() => {
+    isInitializing.value = false
+  }, 50)
 }
 
 
@@ -250,6 +259,19 @@ const handleSubmit = async () => {
       documentId: props.transaction.id,
       data: transactionData
     })
+    
+    await updateFutureIterations({
+      transactionId: props.transaction.id,
+      frequency: transactionData.frequency,
+      newStartDate: formState.value.startDate.toDate(getLocalTimeZone()),
+      newEndDate: formState.value.endDate.toDate(getLocalTimeZone()),
+      data: {
+        amount: Number(formState.value.amount || 0),
+        name: formState.value.name,
+        type: formState.value.type
+      }
+    })
+
     emit('transactionUpdated')
   } else {
     const transactionId = await createTransaction({
@@ -300,9 +322,12 @@ watch(singleDate, (newValue) => {
 })
 
 watch(() => formState.value.frequency, (newFrequency) => {
-  const today = new Date()
-  const start = new CalendarDate(today.getFullYear(), today.getMonth() + 1, today.getDate())
-  let endDate = new Date(today)
+  if (isInitializing.value) return
+
+  const currentStart = formState.value.startDate
+  const start = new CalendarDate(currentStart.year, currentStart.month, currentStart.day)
+  const startDateObj = new Date(start.year, start.month - 1, start.day)
+  let endDate = new Date(startDateObj)
 
   if (newFrequency !== 'once') {
     isRangeMode.value = true
