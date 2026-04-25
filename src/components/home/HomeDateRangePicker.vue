@@ -92,16 +92,18 @@ const df = new DateFormatter('fr-FR', {
 
 const selected = defineModel<DateRange>({ required: true })
 
-const ranges = computed(() => [
-  { label: t('DateRangePicker.currentMonth'), currentMonth: true },
-  { label: t('DateRangePicker.currentYear'), currentYear: true },
-  { label: t('DateRangePicker.last7Days'), days: 7 },
-  { label: t('DateRangePicker.last14Days'), days: 14 },
-  { label: t('DateRangePicker.last30Days'), days: 30 },
-  { label: t('DateRangePicker.last3Months'), months: 3 },
-  { label: t('DateRangePicker.last6Months'), months: 6 },
-  { label: t('DateRangePicker.last1Year'), years: 1 }
-])
+const ranges = computed(() => {
+  return [
+    { label: t('DateRangePicker.currentMonth'), currentMonth: true },
+    { label: t('DateRangePicker.currentYear'), currentYear: true },
+    { label: t('DateRangePicker.last7Days'), days: 7 },
+    { label: t('DateRangePicker.last14Days'), days: 14 },
+    { label: t('DateRangePicker.last30Days'), days: 30 },
+    { label: t('DateRangePicker.last3Months'), months: 3 },
+    { label: t('DateRangePicker.last6Months'), months: 6 },
+    { label: t('DateRangePicker.last1Year'), years: 1 }
+  ]
+})
 
 const toCalendarDate = (date: Date) => {
   return new CalendarDate(
@@ -125,7 +127,9 @@ const calendarRange = computed({
 })
 
 const isRangeSelected = (range: { days?: number, months?: number, years?: number, currentMonth?: boolean, currentYear?: boolean }) => {
-  if (!selected.value.start || !selected.value.end) return false
+  if (!selected.value.start || !selected.value.end) {
+    return false
+  }
 
   const currentDate = today(getLocalTimeZone())
   let startDate: CalendarDate

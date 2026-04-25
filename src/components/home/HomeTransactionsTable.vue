@@ -70,24 +70,24 @@ const filteredTransactions = computed(() => {
   const query = searchQuery.value.toLowerCase().trim()
 
   return allTransactions.value.filter((transaction) => {
-    // Recherche dans le libellé
+    // Search in the label
     const labelMatch = transaction.label.toLowerCase().includes(query)
 
-    // Recherche dans le type (en français)
+    // Search in the type (in French)
     const typeLabel = transaction.type === 'expense' ? 'dépense' : transaction.type === 'income' ? 'revenu' : transaction.type
     const typeMatch = typeLabel.toLowerCase().includes(query)
 
-    // Recherche dans le compte
+    // Search in the account
     const accountMatch = transaction.account.toLowerCase().includes(query)
 
-    // Recherche dans le montant (formaté)
+    // Search in the amount (formatted)
     const formattedAmount = new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'EUR'
     }).format(transaction.amount)
     const amountMatch = formattedAmount.toLowerCase().includes(query) || transaction.amount.toString().includes(query)
 
-    // Recherche dans la date formatée
+    // Search in the formatted date
     const formattedDate = formatDate(transaction.date)
     const dateMatch = formattedDate.toLowerCase().includes(query)
 
@@ -141,7 +141,7 @@ const columns: TableColumn<TransactionForTable>[] = [
       const dateA = rowA.original.date
       const dateB = rowB.original.date
 
-      // Convertir en Date pour comparer
+      // Convert to Date for comparison
       const dateAObj = dateA instanceof Date ? dateA : dateA instanceof Timestamp ? dateA.toDate() : new Date(dateA)
       const dateBObj = dateB instanceof Date ? dateB : dateB instanceof Timestamp ? dateB.toDate() : new Date(dateB)
 
@@ -209,7 +209,7 @@ const columns: TableColumn<TransactionForTable>[] = [
     sortingFn: (rowA, rowB) => {
       const typeA = rowA.original.type
       const typeB = rowB.original.type
-      // Trier: expense avant income
+      // Sort: expense before income
       if (typeA === typeB) return 0
       if (typeA === 'expense') return -1
       if (typeB === 'expense') return 1

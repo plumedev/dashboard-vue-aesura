@@ -11,7 +11,7 @@ export interface TransactionDateRange {
 
 export interface GetTransactionByPeriodParams {
   dateRange?: TransactionDateRange
-  dateField?: string // Nom du champ de date dans Firestore (par défaut: 'date')
+  dateField?: string // Date field name in Firestore (default: 'date')
 }
 
 const { doRequest: getTransactions } = useReadFireDoc()

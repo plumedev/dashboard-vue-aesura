@@ -14,9 +14,12 @@
       </UDashboardNavbar>
 
       <UDashboardToolbar>
-        <template #left>
-          <HomeDateRangePicker v-model="range" class="-ms-1" />
-        </template>
+        <div class="md:hidden w-full">
+          <HomeDateRangePicker v-model="range" class="-ms-1 w-full" />
+        </div>
+        <div class="hidden md:block w-full">
+          <OwlDatePicker v-model="range" class="-ms-1 w-full" />
+        </div>
       </UDashboardToolbar>
     </template>
 
@@ -32,12 +35,14 @@
 
 <script setup lang="ts">
 import { onMounted, ref, shallowRef, watch } from 'vue'
+import { OwlDatePicker } from 'vue-owldate'
 import { startOfMonth, endOfMonth } from 'date-fns'
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Period, DateRange } from '../types'
 import { useGetTransactionByPeriod } from '@/composables/firebase/dedicated/useGetTransactionByPeriod'
 import { DocumentData } from 'firebase/firestore'
 import { useSynthesisStore } from '@/stores/synthesisStore'
+import HomeDateRangePicker from '@/components/home/HomeDateRangePicker.vue'
 
 const synthesisStore = useSynthesisStore()
 

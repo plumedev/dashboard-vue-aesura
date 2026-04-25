@@ -15,7 +15,7 @@ export const useSynthesisStore = defineStore('synthesis', () => {
     try {
       const response = await fetchRecurringTransactions()
 
-      // Pour chaque transaction, on va chercher ses itérations
+      // For each transaction, we fetch its iterations
       const transactionsWithRealIterations = await Promise.all(
         response.map(async t => {
           const iterations = await fetchIterations(t.id)
