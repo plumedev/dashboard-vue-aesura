@@ -50,7 +50,7 @@ const filteredIterations = computed(() => {
 
         const isDateInSelectedRange = !props.range || isWithinInterval(date, { start: props.range.start, end: props.range.end })
 
-        if (isDateInSelectedRange) {
+        if (isDateInSelectedRange && iteration.active !== false) {
           iterationsInSelectedDateRange.push({
             ...iteration,
             date: date,

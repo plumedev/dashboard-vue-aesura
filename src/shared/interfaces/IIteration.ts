@@ -6,4 +6,5 @@ export interface IIteration {
   amount: number
   name?: string
   type?: string
+  active?: boolean
 }

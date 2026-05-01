@@ -7,9 +7,17 @@
         </template>
 
         <template #right>
-          <UDropdownMenu :items="items">
-            <UButton icon="i-lucide-plus" size="md" class="rounded-full" />
-          </UDropdownMenu>
+          <div class="flex items-center gap-2">
+            <UButton 
+              label="Review du mois" 
+              icon="i-lucide-list-checks" 
+              variant="subtle" 
+              @click="reviewModal?.openModal()" 
+            />
+            <UDropdownMenu :items="items">
+              <UButton icon="i-lucide-plus" size="md" class="rounded-full" />
+            </UDropdownMenu>
+          </div>
         </template>
       </UDashboardNavbar>
 
@@ -26,6 +34,7 @@
         <HomeSynthesisTable :period="period" :range="range" :transactions="transactions"
           :is-loading="isLoadingTransactions" />
       </div>
+      <MonthlyReviewModal ref="reviewModal" />
     </template>
   </UDashboardPanel>
 </template>
@@ -38,8 +47,10 @@ import type { Period, DateRange } from '../types'
 import { useGetTransactionByPeriod } from '@/composables/firebase/dedicated/useGetTransactionByPeriod'
 import { DocumentData } from 'firebase/firestore'
 import { useSynthesisStore } from '@/stores/synthesisStore'
+import MonthlyReviewModal from '@/components/home/MonthlyReviewModal.vue'
 
 const synthesisStore = useSynthesisStore()
+const reviewModal = ref<InstanceType<typeof MonthlyReviewModal> | null>(null)
 
 const { isLoading: isLoadingTransactions } = useGetTransactionByPeriod()
 
