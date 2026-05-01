@@ -1,0 +1,10 @@
+{
+  "version": "v1",
+  "packages": {
+    "vue-owldate": {
+      "signature": "2ae26b2de5ef8854564b0a02988250f5",
+      "pure": true,
+      "replaced": "^0.3.1"
+    }
+  }
+}

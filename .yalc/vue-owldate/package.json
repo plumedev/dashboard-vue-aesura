@@ -1,0 +1,47 @@
+{
+  "name": "vue-owldate",
+  "version": "0.3.3",
+  "description": "A lightweight and customizable date range picker component for Vue 3",
+  "keywords": [
+    "vue",
+    "vue3",
+    "datepicker",
+    "date-range",
+    "date-range-picker",
+    "slider",
+    "component",
+    "typescript",
+    "scss"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/vue-owldate.umd.cjs",
+  "module": "./dist/vue-owldate.js",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/vue-owldate.js",
+      "require": "./dist/vue-owldate.umd.cjs"
+    },
+    "./style.css": "./dist/vue-owldate.css"
+  },
+  "types": "./dist/src/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "prebuild": "node -e \"const fs = require('fs'); if (fs.existsSync('dist')) fs.rmSync('dist', { recursive: true, force: true })\"",
+    "build": "npm run prebuild && cross-env BUILD_LIB=true vue-tsc --noEmit && cross-env BUILD_LIB=true vite build",
+    "preview": "vite preview",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  },
+  "dependencies": {
+    "@js-temporal/polyfill": "^0.5.1"
+  },
+  "yalcSig": "2ae26b2de5ef8854564b0a02988250f5"
+}

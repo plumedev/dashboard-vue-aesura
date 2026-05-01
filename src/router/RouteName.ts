@@ -8,6 +8,7 @@ enum RouteName {
   SETTINGS_NOTIFICATIONS = 'settings_notifications',
   SETTINGS_SECURITY = 'settings_security',
   NEW_TRANSACTION = 'new-transaction',
+  ACCOUNTS = 'accounts',
 }
 
 export default RouteName
