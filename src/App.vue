@@ -28,6 +28,13 @@ const links = [[{
     open.value = false
   }
 }, {
+  label: 'Comptes',
+  icon: 'i-lucide-wallet',
+  to: '/accounts',
+  onSelect: () => {
+    open.value = false
+  }
+}, {
   label: 'Réglages',
   to: '/settings',
   icon: 'i-lucide-settings',

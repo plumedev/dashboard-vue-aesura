@@ -86,6 +86,16 @@ const routes: RouteRecordRaw[] = [
       requiresAuth: true,
     },
   },
+  {
+    path: '/accounts',
+    name: RouteName.ACCOUNTS,
+    component: () => import('../pages/accounts.vue'),
+    meta: {
+      title: 'Comptes',
+      requiresAuth: true,
+      icon: 'i-lucide-wallet',
+    },
+  },
 ]
 
 const router = createRouter({
