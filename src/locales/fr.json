@@ -52,8 +52,8 @@
     "title": "Connexion",
     "subtitle": "Connectez-vous avec votre compte Google"
   },
-  "MyMonthPage": {
-    "title": "Home"
+  "FinancialHabitsPage": {
+    "title": "Habitude financière"
   },
   "NewTransactionPage": {
     "noAccount": "Il semblerait que vous n'ayez pas encore de compte.",

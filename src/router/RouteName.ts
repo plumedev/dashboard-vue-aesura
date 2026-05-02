@@ -2,7 +2,7 @@ enum RouteName {
   LOGIN = 'login',
   ROOT = 'root',
   HOME = 'home',
-  MY_MONTH = 'my-month',
+  FINANCIAL_HABITS = 'financial-habits',
   SETTINGS = 'settings',
   SETTINGS_INDEX = 'settings_index',
   SETTINGS_NOTIFICATIONS = 'settings_notifications',
