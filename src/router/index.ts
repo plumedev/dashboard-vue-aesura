@@ -29,11 +29,11 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/my-month',
-    name: RouteName.MY_MONTH,
-    component: () => import('../pages/myMonth.vue'),
+    path: '/financial-habits',
+    name: RouteName.FINANCIAL_HABITS,
+    component: () => import('../pages/financialHabits.vue'),
     meta: {
-      title: 'My month',
+      title: 'Habitude financière',
       requiresAuth: true,
       icon: 'i-lucide-users',
     },

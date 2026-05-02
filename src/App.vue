@@ -21,9 +21,9 @@ const links = [[{
     open.value = false
   }
 }, {
-  label: 'Mon mois',
+  label: 'Habitude financière',
   icon: 'i-lucide-calendar',
-  to: '/my-month',
+  to: '/financial-habits',
   onSelect: () => {
     open.value = false
   }
