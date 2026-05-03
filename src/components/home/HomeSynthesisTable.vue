@@ -30,7 +30,7 @@
             ({{ formatLongDate(row.getLeafRows()[0].original.date) }})
           </span>
         </div>
-        <div v-else-if="row.getParentRow()?.getLeafRows().length > 1" class="flex items-center group" :class="{ 'opacity-40 grayscale italic': !row.original.active }">
+        <div v-else-if="(row.getParentRow()?.getLeafRows()?.length ?? 0) > 1" class="flex items-center group" :class="{ 'opacity-40 grayscale italic': !row.original.active }">
           <span class="inline-block" :style="{ width: `calc((${row.depth} + 1) * 1.5rem)` }" />
           <span class="text-dimmed italic mr-2">{{ $t('HomeSynthesisTable.iterationOf', { date: formatLongDate(row.original.date) }) }}</span>
         </div>

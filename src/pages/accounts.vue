@@ -67,24 +67,16 @@ import { useSynthesisStore } from '@/stores/synthesisStore'
 import { formatMoney } from '@/helpers/moneyHelpers'
 import { toDate } from '@/helpers/dateHelpers'
 import type { DocumentData } from 'firebase/firestore'
-import { startOfMonth, endOfMonth, format, isWithinInterval } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import { startOfMonth, endOfMonth, isWithinInterval } from 'date-fns'
 import AccountEditModal from '@/components/accounts/AccountEditModal.vue'
 
-const { doRequest: getAccounts, isLoading } = useReadFireDoc()
+const { doRequest: getAccounts } = useReadFireDoc()
 const { doRequest: deleteAccount } = useDeleteFireDoc()
 const synthesisStore = useSynthesisStore()
 
 const accounts = ref<DocumentData[]>([])
 const selectedAccount = ref<DocumentData | null>(null)
 const editModal = ref<InstanceType<typeof AccountEditModal> | null>(null)
-
-const statCardUI = {
-  container: 'gap-y-1.5',
-  wrapper: 'items-start',
-  leading: 'hidden sm:block p-2.5 rounded-full bg-primary/10 ring ring-inset ring-primary/25',
-  title: 'font-normal text-muted text-xs uppercase'
-}
 
 const columns = [
   { id: 'name', header: 'Compte' },
@@ -96,10 +88,6 @@ const currentMonthRange = {
   start: startOfMonth(new Date()),
   end: endOfMonth(new Date())
 }
-
-const currentMonthName = computed(() => {
-  return format(new Date(), 'MMMM yyyy', { locale: fr })
-})
 
 const refreshAccounts = async () => {
   const result = await getAccounts({ collectionName: 'accounts' })

@@ -10,6 +10,7 @@ const toast = useToast()
 const route = useRoute()
 
 const isLoginPage = computed(() => route.name === RouteName.LOGIN)
+const isOnboardingPage = computed(() => route.name === RouteName.ONBOARDING)
 
 const open = ref(false)
 
@@ -106,7 +107,7 @@ if (cookie.value !== 'accepted') {
 <template>
   <Suspense>
     <UApp :locale="fr">
-      <template v-if="isLoginPage">
+      <template v-if="isLoginPage || isOnboardingPage">
         <RouterView />
       </template>
       <template v-else>

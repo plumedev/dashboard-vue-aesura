@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { useReadFireDoc } from '@/composables/firebase/useReadFireDoc'
+import { type DocumentData } from 'firebase/firestore'
 import { onMounted, ref, computed, shallowRef } from 'vue'
 import { startOfMonth, endOfMonth } from 'date-fns'
 import NewTransactionView from './newTransactions/newTransactionView.vue'

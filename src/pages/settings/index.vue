@@ -5,14 +5,19 @@ import type { FormSubmitEvent } from '@nuxt/ui'
 
 import { useReadFireDoc } from '@/composables/firebase/useReadFireDoc'
 import { useUpdateFireDoc } from '@/composables/firebase/useUpdateFireDoc'
+import { useDeleteFireDoc } from '@/composables/firebase/useDeleteFireDoc'
 import { useSynthesisStore } from '@/stores/synthesisStore'
 import type { DocumentData } from 'firebase/firestore'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const fileRef = ref<HTMLInputElement>()
 const { doRequest: getAccounts } = useReadFireDoc()
 const { doRequest: updateTransaction } = useUpdateFireDoc()
 const synthesisStore = useSynthesisStore()
 const isCleaning = ref(false)
+const isResetting = ref(false)
+const { doRequest: deleteDoc } = useDeleteFireDoc()
 
 const profileSchema = z.object({
   name: z.string().min(2, 'Too short'),
@@ -110,6 +115,56 @@ const cleanTransactions = async () => {
     })
   } finally {
     isCleaning.value = false
+  }
+}
+
+const onSubmit = (_event: FormSubmitEvent<ProfileSchema>) => {
+  toast.add({
+    title: 'Profil mis à jour',
+    description: 'Vos modifications ont été enregistrées avec succès.',
+    icon: 'i-lucide-check',
+    color: 'success'
+  })
+}
+
+const resetUserData = async () => {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer TOUTES vos données ? Cette action est irréversible.')) {
+    return
+  }
+
+  isResetting.value = true
+  try {
+    const collections = ['accounts', 'recurringTransactions', 'iterations', 'transactions']
+    let deleteCount = 0
+
+    for (const collectionName of collections) {
+      const docs = await getAccounts({ collectionName })
+      if (Array.isArray(docs)) {
+        for (const doc of docs) {
+          await deleteDoc({ collectionName, documentId: doc.id })
+          deleteCount++
+        }
+      }
+    }
+
+    toast.add({
+      title: 'Réinitialisation terminée',
+      description: `${deleteCount} documents ont été supprimés.`,
+      icon: 'i-lucide-trash-2',
+      color: 'success'
+    })
+
+    await synthesisStore.getRecurringTransactions()
+    router.push('/onboarding')
+  } catch (error: any) {
+    toast.add({
+      title: 'Erreur',
+      description: error.message,
+      icon: 'i-lucide-x',
+      color: 'error'
+    })
+  } finally {
+    isResetting.value = false
   }
 }
 
@@ -241,23 +296,56 @@ function onFileClick() {
     </UPageCard>
 
     <UPageCard
-      title="Maintenance des données"
-      description="Outils de nettoyage et d'harmonisation de la base de données."
+      :title="$t('SettingsPage.maintenanceTitle')"
+      :description="$t('SettingsPage.maintenanceDesc')"
       class="mt-8"
     >
       <div class="flex flex-col gap-4">
         <div class="flex justify-between items-center p-4 bg-muted/5 border border-default rounded-xl">
           <div>
-            <p class="font-medium text-highlighted">Harmonisation des comptes</p>
-            <p class="text-sm text-muted">Corrige les noms de comptes dans les transactions et assigne un compte par défaut (CIC) si manquant.</p>
+            <p class="font-medium text-highlighted">{{ $t('SettingsPage.cleanAccountsTitle') }}</p>
+            <p class="text-sm text-muted">{{ $t('SettingsPage.cleanAccountsDesc') }}</p>
           </div>
           <UButton 
-            label="Lancer le nettoyage" 
+            :label="$t('SettingsPage.cleanAccountsButton')" 
             icon="i-lucide-wand-2" 
             color="primary" 
             variant="subtle"
             :loading="isCleaning"
             @click="cleanTransactions"
+          />
+        </div>
+
+        <USeparator />
+
+        <div class="flex justify-between items-center p-4 bg-muted/5 border border-default rounded-xl">
+          <div>
+            <p class="font-medium text-highlighted">{{ $t('SettingsPage.onboardingTitle') }}</p>
+            <p class="text-sm text-muted">{{ $t('SettingsPage.onboardingDesc') }}</p>
+          </div>
+          <UButton 
+            :label="$t('SettingsPage.onboardingButton')" 
+            icon="i-lucide-rocket" 
+            color="primary" 
+            variant="subtle"
+            to="/onboarding"
+          />
+        </div>
+
+        <USeparator />
+
+        <div class="flex justify-between items-center p-4 bg-error/5 border border-error/20 rounded-xl">
+          <div>
+            <p class="font-medium text-error">{{ $t('SettingsPage.resetTitle') }}</p>
+            <p class="text-sm text-muted">{{ $t('SettingsPage.resetDesc') }}</p>
+          </div>
+          <UButton 
+            :label="$t('SettingsPage.resetButton')" 
+            icon="i-lucide-trash-2" 
+            color="error" 
+            variant="subtle"
+            :loading="isResetting"
+            @click="resetUserData"
           />
         </div>
       </div>
