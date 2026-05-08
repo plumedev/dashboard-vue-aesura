@@ -60,7 +60,19 @@
     "notReadyTitle": "Il semblerait que tout ne soit pas prêt"
   },
   "SettingsPage": {
-    "title": "Settings"
+    "title": "Settings",
+    "maintenanceTitle": "Maintenance des données",
+    "maintenanceDesc": "Outils de nettoyage et d'harmonisation de la base de données.",
+    "cleanAccountsTitle": "Harmonisation des comptes",
+    "cleanAccountsDesc": "Corrige les noms de comptes dans les transactions et assigne un compte par défaut (CIC) si manquant.",
+    "cleanAccountsButton": "Lancer le nettoyage",
+    "onboardingTitle": "Tutoriel de bienvenue",
+    "onboardingDesc": "Relancer le tutoriel interactif pour configurer vos comptes et vos revenus/dépenses récurrents.",
+    "onboardingButton": "Relancer le tutoriel",
+    "resetButton": "Réinitialiser",
+    "exampleDataTitle": "Nettoyage & Données d'exemple",
+    "exampleDataDesc": "Supprime vos données et génère des exemples (comptes, loyer, salaire, etc.) pour tester l'application.",
+    "exampleDataButton": "Générer les exemples"
   },
   "SettingsProfile": {
     "title": "Profile",
@@ -97,5 +109,29 @@
     "last6Months": "6 prochains mois",
     "last1Year": "Année à venir",
     "pickDate": "Choisir une date"
+  },
+  "OnboardingPage": {
+    "title": "Bienvenue sur Aesura",
+    "step1": {
+      "title": "Vos comptes bancaires",
+      "description": "Commençons par configurer les comptes que vous souhaitez suivre. Il peut s'agir de votre compte courant, d'un livret A, ou de toute autre poche d'argent que vous gérez."
+    },
+    "step2": {
+      "title": "Vos dépenses récurrentes",
+      "description": "Quelles sont les factures ou dépenses qui reviennent chaque mois ? Loyer, abonnements, électricité... Les lister ici vous permettra d'anticiper votre reste à vivre."
+    },
+    "step3": {
+      "title": "Vos revenus récurrents",
+      "description": "Enfin, renseignez vos entrées d'argent régulières. Salaire, aides, remboursements... Cela complètera la vision globale de votre budget."
+    },
+    "next": "Suivant",
+    "previous": "Précédent",
+    "finish": "Terminer le tutoriel",
+    "addAccount": "Ajouter un compte",
+    "addExpense": "Ajouter une dépense",
+    "addIncome": "Ajouter un revenu",
+    "emptyAccounts": "Aucun compte ajouté pour le moment.",
+    "emptyExpenses": "Aucune dépense récurrente ajoutée.",
+    "emptyIncomes": "Aucun revenu récurrent ajouté."
   }
 }

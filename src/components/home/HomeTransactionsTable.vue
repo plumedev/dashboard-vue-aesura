@@ -29,6 +29,7 @@ export interface TransactionForTable {
   label: string
   id: string
   date: Date | Timestamp | string
+  endDate?: Date | Timestamp | string
   type: string
   amount: number
   account: string
@@ -45,6 +46,7 @@ const convertTransactionsForTable = (transactions: DocumentData[]): TransactionF
       label: transaction.name || '',
       id: transaction.id || '',
       date: transaction.effectDate,
+      endDate: transaction.effectEndDate,
       type: transaction.type || '',
       amount: transaction.amount || 0,
       account: transaction.account?.label || '',
@@ -135,6 +137,14 @@ const columns: TableColumn<TransactionForTable>[] = [
     },
     cell: ({ row }) => {
       const date = row.getValue('date') as Date | Timestamp | string
+      const endDate = row.original.endDate
+      
+      if (endDate) {
+        return h('div', { class: 'flex flex-col' }, [
+          h('span', formatDate(date)),
+          h('span', { class: 'text-[10px] text-muted font-medium' }, `au ${formatDate(endDate)}`)
+        ])
+      }
       return formatDate(date)
     },
     sortingFn: (rowA, rowB) => {

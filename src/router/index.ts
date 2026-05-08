@@ -8,6 +8,7 @@ import {
 import { watch } from 'vue'
 import RouteName from './RouteName'
 import { useAuthStore } from '@/stores/authStore'
+import { useReadFireDoc } from '@/composables/firebase/useReadFireDoc'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -16,6 +17,15 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../pages/login/LoginView.vue'),
     meta: {
       title: 'Connexion',
+    },
+  },
+  {
+    path: '/onboarding',
+    name: RouteName.ONBOARDING,
+    component: () => import('../pages/onboarding.vue'),
+    meta: {
+      title: 'Bienvenue',
+      requiresAuth: true,
     },
   },
   {
@@ -150,6 +160,17 @@ router.beforeEach(
     if (to.name === RouteName.LOGIN && authStore.isAuthenticated) {
       next({ path: '/' })
       return
+    }
+
+    // Redirection vers l'onboarding si pas de comptes (nouvel utilisateur)
+    if (authStore.isAuthenticated && to.name !== RouteName.ONBOARDING) {
+      // On pourrait optimiser en utilisant un store, mais ici on va vérifier via Firebase
+      const { doRequest: getAccounts } = useReadFireDoc()
+      const accounts = await getAccounts({ collectionName: 'accounts' })
+      if (!accounts || (Array.isArray(accounts) && accounts.length === 0)) {
+        next({ name: RouteName.ONBOARDING })
+        return
+      }
     }
 
     next()

@@ -71,13 +71,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { useSynthesisStore } from '@/stores/synthesisStore'
-import { startOfMonth, endOfMonth, isWithinInterval, format } from 'date-fns'
-import { fr } from 'date-fns/locale'
-import { toDate } from '@/helpers/dateHelpers'
 import { useUpdateFireDoc } from '@/composables/firebase/useUpdateFireDoc'
+import { toDate } from '@/helpers/dateHelpers'
+import { useSynthesisStore } from '@/stores/synthesisStore'
+import { endOfMonth, format, isWithinInterval, startOfMonth } from 'date-fns'
+import { fr } from 'date-fns/locale'
 import { Timestamp } from 'firebase/firestore'
+import { computed, ref } from 'vue'
 
 const open = ref(false)
 const isSaving = ref(false)

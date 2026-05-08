@@ -9,6 +9,7 @@ enum RouteName {
   SETTINGS_SECURITY = 'settings_security',
   NEW_TRANSACTION = 'new-transaction',
   ACCOUNTS = 'accounts',
+  ONBOARDING = 'onboarding',
 }
 
 export default RouteName
