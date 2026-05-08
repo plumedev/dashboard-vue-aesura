@@ -26,16 +26,38 @@
               </div>
             </template>
 
+            <template #income-cell="{ row }">
+              <div class="flex flex-col gap-1">
+                <div class="flex justify-between items-end">
+                  <span class="font-bold text-success">{{ formatMoney(getAccountActivity(row.original.accountName).income) }}</span>
+                  <span class="text-[10px] text-muted">{{ getIncomePercentage(row.original.accountName) }}%</span>
+                </div>
+                <div class="w-24 h-1.5 bg-default/30 rounded-full overflow-hidden">
+                  <div class="bg-success h-full rounded-full" :style="{ width: getIncomePercentage(row.original.accountName) + '%' }"></div>
+                </div>
+              </div>
+            </template>
+
             <template #spending-cell="{ row }">
               <div class="flex flex-col gap-1">
                 <div class="flex justify-between items-end">
-                  <span class="font-bold text-highlighted">{{ formatMoney(getSpendingForAccount(row.original.accountName)) }}</span>
+                  <span class="font-bold text-highlighted">{{ formatMoney(getAccountActivity(row.original.accountName).expense) }}</span>
                   <span class="text-[10px] text-muted">{{ getSpendingPercentage(row.original.accountName) }}%</span>
                 </div>
                 <div class="w-24 h-1.5 bg-default/30 rounded-full overflow-hidden">
                   <div class="bg-error h-full rounded-full" :style="{ width: getSpendingPercentage(row.original.accountName) + '%' }"></div>
                 </div>
               </div>
+            </template>
+
+            <template #balance-cell="{ row }">
+              <UBadge 
+                :color="getAccountActivity(row.original.accountName).balance >= 0 ? 'success' : 'error'" 
+                variant="subtle"
+                class="font-bold"
+              >
+                {{ getAccountActivity(row.original.accountName).balance >= 0 ? '+' : '' }}{{ formatMoney(getAccountActivity(row.original.accountName).balance) }}
+              </UBadge>
             </template>
 
             <template #actions-cell="{ row }">
@@ -80,7 +102,9 @@ const editModal = ref<InstanceType<typeof AccountEditModal> | null>(null)
 
 const columns = [
   { id: 'name', header: 'Compte' },
-  { id: 'spending', header: 'Dépenses du mois' },
+  { id: 'income', header: 'Revenus' },
+  { id: 'spending', header: 'Dépenses' },
+  { id: 'balance', header: 'Solde net' },
   { id: 'actions', header: '', class: 'text-right' }
 ]
 
@@ -96,32 +120,48 @@ const refreshAccounts = async () => {
   }
 }
 
-const getSpendingForAccount = (accountName: string) => {
-  let total = 0
+const getAccountActivity = (accountName: string) => {
+  let income = 0
+  let expense = 0
+  
   synthesisStore.recurringTransactions.forEach(transaction => {
-    // Vérification flexible du nom du compte
     const transactionAccount = transaction.account?.label || transaction.account
     if (transactionAccount !== accountName) return
     
     const iterations = transaction.iterations || []
     iterations.forEach((iteration: any) => {
       const date = toDate(iteration.date)
-      if (isWithinInterval(date, currentMonthRange) && iteration.type === 'expense' && iteration.active !== false) {
-        total += Number(iteration.amount || 0)
+      if (isWithinInterval(date, currentMonthRange) && iteration.active !== false) {
+        if (iteration.type === 'income') {
+          income += Number(iteration.amount || 0)
+        } else {
+          expense += Number(iteration.amount || 0)
+        }
       }
     })
   })
-  return total
+  
+  return { income, expense, balance: income - expense }
 }
 
 const totalSpending = computed(() => {
-  return accounts.value.reduce((acc, account) => acc + getSpendingForAccount(account.accountName), 0)
+  return accounts.value.reduce((acc, account) => acc + getAccountActivity(account.accountName).expense, 0)
+})
+
+const totalIncome = computed(() => {
+  return accounts.value.reduce((acc, account) => acc + getAccountActivity(account.accountName).income, 0)
 })
 
 const getSpendingPercentage = (accountName: string) => {
   if (totalSpending.value === 0) return 0
-  const spending = getSpendingForAccount(accountName)
+  const spending = getAccountActivity(accountName).expense
   return Math.round((spending / totalSpending.value) * 100)
+}
+
+const getIncomePercentage = (accountName: string) => {
+  if (totalIncome.value === 0) return 0
+  const income = getAccountActivity(accountName).income
+  return Math.round((income / totalIncome.value) * 100)
 }
 
 const handleAddAccount = () => {

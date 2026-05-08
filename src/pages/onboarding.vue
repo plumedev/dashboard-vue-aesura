@@ -5,7 +5,7 @@
         <template #right>
           <div class="flex items-center gap-2">
             <span class="text-sm text-muted">Étape {{ currentStep }} sur 3</span>
-            <UProgress :value="(currentStep / 3) * 100" size="sm" class="w-32" />
+            <UProgress v-model="currentStep" :max="3" size="sm" class="w-32" />
           </div>
         </template>
       </UDashboardNavbar>
@@ -132,6 +132,8 @@
                 :account-options="accountOptions" 
                 :loading="isCreatingTransaction"
                 :initial-type="currentStep === 2 ? 'expense' : 'income'"
+                :show-type="false"
+                layout="onboarding"
                 @submit="addTransaction"
               />
             </div>
@@ -148,79 +150,81 @@
               </div>
 
               <div class="flex-1 overflow-auto">
-                <UTable 
-                  v-if="currentStep === 1" 
-                  :data="accounts" 
-                  :columns="accountColumns" 
-                  class="flex-1"
-                  :ui="{
-                    base: 'table-fixed border-separate border-spacing-0',
-                    thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
-                    tbody: '[&>tr]:last:[&>td]:border-b-0',
-                    th: 'first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
-                    td: 'border-b border-default'
-                  }"
-                >
-                  <template #accountName-cell="{ row }">
-                    <div class="flex items-center gap-3">
-                      <div class="p-2 bg-primary/10 rounded-lg">
-                        <UIcon name="i-lucide-wallet" class="w-4 h-4 text-primary" />
-                      </div>
-                      <span class="font-medium text-highlighted">{{ row.original.accountName }}</span>
-                    </div>
-                  </template>
-                  <template #actions-cell="{ row }">
-                    <div class="flex justify-end">
-                      <UButton icon="i-lucide-trash" variant="ghost" color="error" size="xs" @click="deleteAccountDoc(row.original.id)" />
-                    </div>
-                  </template>
-                </UTable>
-
-                <UTable 
-                  v-else 
-                  :data="filteredTransactions" 
-                  :columns="transactionColumns" 
-                  class="flex-1"
-                  :ui="{
-                    base: 'table-fixed border-separate border-spacing-0',
-                    thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
-                    tbody: '[&>tr]:last:[&>td]:border-b-0',
-                    th: 'first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r',
-                    td: 'border-b border-default'
-                  }"
-                >
-                  <template #amount-cell="{ row }">
-                    <span :class="`font-bold ${row.original.type === 'expense' ? 'text-error' : 'text-success'}`">
-                      {{ row.original.type === 'expense' ? '-' : '+' }}{{ row.original.amount }}€
-                    </span>
-                  </template>
-                  <template #type-cell="{ row }">
-                    <UBadge :color="row.original.type === 'expense' ? 'error' : 'success'" variant="subtle" size="sm">
-                      {{ row.original.type === 'expense' ? 'Dépense' : 'Revenu' }}
-                    </UBadge>
-                  </template>
-                  <template #account-cell="{ row }">
-                    <span class="text-sm">{{ row.original.account.label }}</span>
-                  </template>
-                  <template #frequency-cell="{ row }">
-                    <span class="text-sm text-muted">
-                      {{ frequencyOptions.find(f => f.value === row.original.frequency)?.label || row.original.frequency }}
-                    </span>
-                  </template>
-                  <template #actions-cell="{ row }">
-                    <div class="flex justify-end">
-                      <UButton icon="i-lucide-trash" variant="ghost" color="error" size="xs" @click="deleteTransactionDoc(row.original.id)" />
-                    </div>
-                  </template>
-                </UTable>
-
-                <div v-if="(currentStep === 1 && accounts.length === 0) || (currentStep !== 1 && filteredTransactions.length === 0)" 
-                     class="flex-1 flex flex-col items-center justify-center p-12 text-center text-muted gap-4">
-                  <div class="p-4 bg-default/5 rounded-full">
-                    <UIcon :name="currentStep === 1 ? 'i-lucide-wallet' : 'i-lucide-list-plus'" class="w-12 h-12 opacity-20" />
+                <Transition name="table-fade" mode="out-in">
+                  <!-- Step 1: Accounts Table -->
+                  <div v-if="currentStep === 1 && accounts.length > 0" key="accounts-table-container">
+                    <table class="w-full table-fixed border-separate border-spacing-0">
+                      <thead class="bg-elevated/50">
+                        <tr>
+                          <th class="px-4 py-3 text-left text-xs font-bold text-muted uppercase tracking-wider border-y border-l border-default rounded-l-lg">Nom du compte</th>
+                          <th class="px-4 py-3 text-right border-y border-r border-default rounded-r-lg w-24">Actions</th>
+                        </tr>
+                      </thead>
+                      <TransitionGroup tag="tbody" name="row-list">
+                        <tr v-for="account in accounts" :key="account.id">
+                          <td class="px-4 py-4 border-b border-default">
+                            <div class="flex items-center gap-3">
+                              <div class="p-2 bg-primary/10 rounded-lg">
+                                <UIcon name="i-lucide-wallet" class="w-4 h-4 text-primary" />
+                              </div>
+                              <span class="font-medium text-highlighted">{{ account.accountName }}</span>
+                            </div>
+                          </td>
+                          <td class="px-4 py-4 border-b border-default text-right">
+                            <UButton icon="i-lucide-trash" variant="ghost" color="error" size="xs" @click="deleteAccountDoc(account.id)" />
+                          </td>
+                        </tr>
+                      </TransitionGroup>
+                    </table>
                   </div>
-                  <p>{{ currentStep === 1 ? $t('OnboardingPage.emptyAccounts') : (currentStep === 2 ? $t('OnboardingPage.emptyExpenses') : $t('OnboardingPage.emptyIncomes')) }}</p>
-                </div>
+
+                  <!-- Step 2 & 3: Transactions Table -->
+                  <div v-else-if="currentStep !== 1 && filteredTransactions.length > 0" key="transactions-table-container">
+                    <table class="w-full table-fixed border-separate border-spacing-0">
+                      <thead class="bg-elevated/50">
+                        <tr>
+                          <th class="px-4 py-3 text-left text-xs font-bold text-muted uppercase tracking-wider border-y border-l border-default rounded-l-lg">Libellé</th>
+                          <th class="px-4 py-3 text-left text-xs font-bold text-muted uppercase tracking-wider border-y border-default">Montant</th>
+                          <th class="px-4 py-3 text-left text-xs font-bold text-muted uppercase tracking-wider border-y border-default">Type</th>
+                          <th class="px-4 py-3 text-left text-xs font-bold text-muted uppercase tracking-wider border-y border-default">Compte</th>
+                          <th class="px-4 py-3 text-left text-xs font-bold text-muted uppercase tracking-wider border-y border-default">Fréquence</th>
+                          <th class="px-4 py-3 text-right border-y border-r border-default rounded-r-lg w-20"></th>
+                        </tr>
+                      </thead>
+                      <TransitionGroup tag="tbody" name="row-list">
+                        <tr v-for="t in filteredTransactions" :key="t.id">
+                          <td class="px-4 py-4 border-b border-default text-sm">{{ t.name }}</td>
+                          <td class="px-4 py-4 border-b border-default">
+                            <span :class="`font-bold ${t.type === 'expense' ? 'text-error' : 'text-success'}`">
+                              {{ t.type === 'expense' ? '-' : '+' }}{{ t.amount }}€
+                            </span>
+                          </td>
+                          <td class="px-4 py-4 border-b border-default">
+                            <UBadge :color="t.type === 'expense' ? 'error' : 'success'" variant="subtle" size="sm">
+                              {{ t.type === 'expense' ? 'Dépense' : 'Revenu' }}
+                            </UBadge>
+                          </td>
+                          <td class="px-4 py-4 border-b border-default text-sm">{{ t.account.label }}</td>
+                          <td class="px-4 py-4 border-b border-default text-sm text-muted">
+                            {{ frequencyOptions.find(f => f.value === t.frequency)?.label || t.frequency }}
+                          </td>
+                          <td class="px-4 py-4 border-b border-default text-right">
+                            <UButton icon="i-lucide-trash" variant="ghost" color="error" size="xs" @click="deleteTransactionDoc(t.id)" />
+                          </td>
+                        </tr>
+                      </TransitionGroup>
+                    </table>
+                  </div>
+
+                  <div v-else 
+                       key="empty-state"
+                       class="flex-1 flex flex-col items-center justify-center p-12 text-center text-muted gap-4 min-h-[300px]">
+                    <div class="p-4 bg-default/5 rounded-full">
+                      <UIcon :name="currentStep === 1 ? 'i-lucide-wallet' : 'i-lucide-list-plus'" class="w-12 h-12 opacity-20" />
+                    </div>
+                    <p>{{ currentStep === 1 ? $t('OnboardingPage.emptyAccounts') : (currentStep === 2 ? $t('OnboardingPage.emptyExpenses') : $t('OnboardingPage.emptyIncomes')) }}</p>
+                  </div>
+                </Transition>
               </div>
             </div>
           </div>
@@ -400,3 +404,59 @@ onMounted(async () => {
   await refreshTransactions()
 })
 </script>
+
+<style scoped>
+/* Transition Group for Table Rows */
+.row-list-move,
+.row-list-enter-active,
+.row-list-leave-active {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.row-list-enter-from {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.row-list-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.row-list-leave-active {
+  position: absolute;
+  width: 100%;
+}
+
+tbody {
+  position: relative;
+}
+
+/* Table State Transitions */
+.table-fade-enter-active,
+.table-fade-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.table-fade-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.table-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Step Circle Pulse */
+.bg-primary.text-black {
+  box-shadow: 0 0 0 0 rgba(var(--ui-primary-rgb), 0.4);
+  animation: step-pulse 2s infinite;
+}
+
+@keyframes step-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ui-primary) 40%, transparent); }
+  70% { box-shadow: 0 0 0 10px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+</style>

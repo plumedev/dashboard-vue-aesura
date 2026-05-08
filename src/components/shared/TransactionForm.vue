@@ -1,28 +1,20 @@
 <template>
   <UForm :state="state" class="space-y-4" @submit="$emit('submit', state)">
-    <!-- Row 1: Name & Amount -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <UInput v-model="state.name" placeholder="Nom de la transaction" size="lg" class="w-full" />
-      <UInput v-model="state.amount" type="number" step="0.01" placeholder="Montant (€)" size="lg" class="w-full" />
+    <!-- Row 1: Name & Amount (Optimized Widths) -->
+    <div :class="['grid grid-cols-1 gap-4', layout === 'onboarding' ? 'md:grid-cols-10' : 'md:grid-cols-2']">
+      <UInput v-model="state.name" placeholder="Nom de la transaction" size="lg" :class="layout === 'onboarding' ? 'md:col-span-7' : 'w-full'" />
+      <UInput v-model="state.amount" type="number" step="0.01" placeholder="Montant (€)" size="lg" :class="layout === 'onboarding' ? 'md:col-span-3' : 'w-full'" />
     </div>
 
-    <!-- Row 2: Account & Type -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <USelect v-model="state.account" :items="accountOptions" placeholder="Compte" size="lg" class="w-full" />
-      <USelect v-model="state.type" :items="typeOptions" size="lg" class="w-full" />
-    </div>
-
-    <!-- Row 3: Frequency Tabs -->
-    <div class="space-y-4 pt-2">
-      <UTabs 
-        v-model="state.frequency" 
-        :items="frequencyOptions" 
-        class="w-full frequency-tabs"
-      />
-
-      <!-- Row 4: Date & EndDate Switch -->
-      <div class="flex flex-col sm:flex-row items-center justify-start gap-6 pt-2">
-        <div class="w-full sm:w-auto min-w-[280px]">
+    <!-- ONBOARDING LAYOUT (Refined) -->
+    <template v-if="layout === 'onboarding'">
+      <!-- Line 2: Account, Date & End Date Switch -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+        <div class="md:col-span-3">
+          <USelect v-model="state.account" :items="accountOptions" placeholder="Compte" size="lg" class="w-full" />
+        </div>
+        
+        <div class="md:col-span-6">
           <UInputDate v-if="isRangeMode" ref="inputDate" v-model="rangeDate" range size="lg">
             <template #trailing>
               <UPopover :reference="inputDate?.inputsRef[0]?.$el">
@@ -60,30 +52,120 @@
           </UInputDate>
         </div>
 
-        <div class="flex items-center gap-3 shrink-0">
+        <div class="md:col-span-3 flex items-center gap-3">
           <USwitch 
             v-model="isRangeMode" 
             unchecked-icon="i-lucide-x" 
             checked-icon="i-lucide-check"
             color="primary"
+            size="lg"
           />
-          <span class="text-sm font-medium text-white/80">Date de fin</span>
+          <span class="text-sm text-white/60">Date de fin</span>
         </div>
       </div>
-    </div>
 
-    <!-- Row 5: Action Button -->
-    <div class="flex justify-start pt-4">
-      <UButton 
-        type="submit" 
-        :label="submitLabel" 
-        color="primary"
-        size="lg" 
-        :loading="loading" 
-        :disabled="!isValid" 
-        class="px-8"
-      />
-    </div>
+      <!-- Line 3: Frequency & Add Button -->
+      <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 pt-2">
+        <div class="w-full md:flex-1">
+          <UTabs 
+            v-model="state.frequency" 
+            :items="frequencyOptions" 
+            class="w-full frequency-tabs"
+          />
+        </div>
+
+        <UButton 
+          type="submit" 
+          :label="submitLabel" 
+          color="primary"
+          size="lg" 
+          :loading="loading" 
+          :disabled="!isValid" 
+          class="px-12 font-bold"
+        />
+      </div>
+    </template>
+
+    <!-- DEFAULT LAYOUT -->
+    <template v-else>
+      <!-- Row 2: Account & Type -->
+      <div :class="['grid grid-cols-1 gap-4', showType ? 'md:grid-cols-2' : '']">
+        <USelect v-model="state.account" :items="accountOptions" placeholder="Compte" size="lg" class="w-full" />
+        <USelect v-if="showType" v-model="state.type" :items="typeOptions" size="lg" class="w-full" />
+      </div>
+
+      <!-- Row 3 & 4: Frequency & Date -->
+      <div class="space-y-4 pt-2">
+        <UTabs 
+          v-model="state.frequency" 
+          :items="frequencyOptions" 
+          class="w-full frequency-tabs"
+        />
+
+        <div class="flex flex-col sm:flex-row items-center justify-start gap-6 pt-2">
+          <div class="w-full sm:w-auto min-w-[280px]">
+            <UInputDate v-if="isRangeMode" ref="inputDate" v-model="rangeDate" range size="lg">
+              <template #trailing>
+                <UPopover :reference="inputDate?.inputsRef[0]?.$el">
+                  <UButton color="neutral" variant="link" size="sm" icon="i-lucide-calendar" class="px-0" />
+                  <template #content>
+                    <div class="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-default">
+                      <div class="p-2 space-y-1 bg-default/5 w-fit min-w-32 shrink-0">
+                        <p class="text-[10px] font-bold text-muted uppercase tracking-wider px-2 py-1">Raccourcis</p>
+                        <UButton 
+                          v-for="preset in datePresets" 
+                          :key="preset.label"
+                          :label="preset.label" 
+                          variant="ghost" 
+                          color="neutral" 
+                          size="xs" 
+                          class="w-full justify-start font-medium"
+                          @click="setDatePreset(preset.value)"
+                        />
+                      </div>
+                      <UCalendar v-model="rangeDate" class="p-2" :number-of-months="2" range />
+                    </div>
+                  </template>
+                </UPopover>
+              </template>
+            </UInputDate>
+            <UInputDate v-else ref="inputDate" v-model="singleDate" size="lg">
+              <template #trailing>
+                <UPopover :reference="inputDate?.inputsRef[0]?.$el">
+                  <UButton color="neutral" variant="link" size="sm" icon="i-lucide-calendar" class="px-0" />
+                  <template #content>
+                    <UCalendar v-model="singleDate" class="p-2" />
+                  </template>
+                </UPopover>
+              </template>
+            </UInputDate>
+          </div>
+
+          <div class="flex items-center gap-3 shrink-0">
+            <USwitch 
+              v-model="isRangeMode" 
+              unchecked-icon="i-lucide-x" 
+              checked-icon="i-lucide-check"
+              color="primary"
+            />
+            <span class="text-sm font-medium text-white/80">Date de fin</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 5: Action Button -->
+      <div class="flex justify-start pt-4">
+        <UButton 
+          type="submit" 
+          :label="submitLabel" 
+          color="primary"
+          size="lg" 
+          :loading="loading" 
+          :disabled="!isValid" 
+          class="px-8"
+        />
+      </div>
+    </template>
   </UForm>
 </template>
 
@@ -92,12 +174,18 @@ import { ref, computed, watch, shallowRef, useTemplateRef } from 'vue'
 import { CalendarDate } from '@internationalized/date'
 import type { TabsItem } from '@nuxt/ui'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   accountOptions: { label: string; value: string }[]
   loading?: boolean
   submitLabel?: string
   initialType?: 'income' | 'expense'
-}>()
+  showType?: boolean
+  layout?: 'default' | 'onboarding'
+}>(), {
+  showType: true,
+  initialType: 'expense',
+  layout: 'default'
+})
 
 const emit = defineEmits(['submit'])
 
@@ -149,6 +237,12 @@ watch(singleDate, (newValue) => {
   state.value.startDate = newValue
   state.value.endDate = newValue
 })
+
+watch(() => props.initialType, (newType) => {
+  if (newType) {
+    state.value.type = newType
+  }
+}, { immediate: true })
 
 watch(() => state.value.frequency, (newFrequency) => {
   const currentStart = state.value.startDate

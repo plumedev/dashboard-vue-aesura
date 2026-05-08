@@ -69,9 +69,10 @@
     "onboardingTitle": "Tutoriel de bienvenue",
     "onboardingDesc": "Relancer le tutoriel interactif pour configurer vos comptes et vos revenus/dépenses récurrents.",
     "onboardingButton": "Relancer le tutoriel",
-    "resetTitle": "Réinitialiser les données",
-    "resetDesc": "Supprime définitivement TOUTES vos données (comptes, transactions, etc.).",
-    "resetButton": "Réinitialiser"
+    "resetButton": "Réinitialiser",
+    "exampleDataTitle": "Nettoyage & Données d'exemple",
+    "exampleDataDesc": "Supprime vos données et génère des exemples (comptes, loyer, salaire, etc.) pour tester l'application.",
+    "exampleDataButton": "Générer les exemples"
   },
   "SettingsProfile": {
     "title": "Profile",
