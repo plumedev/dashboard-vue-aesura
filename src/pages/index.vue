@@ -14,9 +14,6 @@
               variant="subtle" 
               @click="reviewModal?.openModal()" 
             />
-            <UDropdownMenu :items="items">
-              <UButton icon="i-lucide-plus" size="md" class="rounded-full" />
-            </UDropdownMenu>
           </div>
         </template>
       </UDashboardNavbar>
@@ -42,7 +39,6 @@
 <script setup lang="ts">
 import { onMounted, ref, shallowRef, watch } from 'vue'
 import { startOfMonth, endOfMonth } from 'date-fns'
-import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Period, DateRange } from '../types'
 import { useGetTransactionByPeriod } from '@/composables/firebase/dedicated/useGetTransactionByPeriod'
 import { DocumentData } from 'firebase/firestore'
@@ -55,11 +51,6 @@ const reviewModal = ref<InstanceType<typeof MonthlyReviewModal> | null>(null)
 const { isLoading: isLoadingTransactions } = useGetTransactionByPeriod()
 
 const transactions = ref<DocumentData[]>([])
-const items = [[{
-  label: 'Nouvelle transaction',
-  icon: 'i-lucide-banknote-arrow-up',
-  to: '/new-transaction'
-}]] satisfies DropdownMenuItem[][]
 
 const range = shallowRef<DateRange>({
   start: startOfMonth(new Date()),
