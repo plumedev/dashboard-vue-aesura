@@ -36,6 +36,13 @@ const links = [[{
     open.value = false
   }
 }, {
+  label: 'Flux mensuels',
+  icon: 'i-lucide-git-fork',
+  to: '/monthly-flows',
+  onSelect: () => {
+    open.value = false
+  }
+}, {
   label: 'Réglages',
   to: '/settings',
   icon: 'i-lucide-settings',

@@ -275,20 +275,6 @@ const recurringTransactions = ref<DocumentData[]>([])
 const isCreatingAccount = ref(false)
 const isCreatingTransaction = ref(false)
 
-const accountColumns = [
-  { accessorKey: 'accountName', header: 'Nom du compte' },
-  { id: 'actions', class: 'text-right' }
-]
-
-const transactionColumns = [
-  { accessorKey: 'name', header: 'Libellé' },
-  { accessorKey: 'amount', header: 'Montant' },
-  { accessorKey: 'type', header: 'Type' },
-  { accessorKey: 'account', header: 'Compte' },
-  { accessorKey: 'frequency', header: 'Fréquence' },
-  { id: 'actions', class: 'text-right' }
-]
-
 // Step 1: Account Form
 const accountForm = reactive({
   accountName: ''
