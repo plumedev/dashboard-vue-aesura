@@ -10,6 +10,7 @@ enum RouteName {
   NEW_TRANSACTION = 'new-transaction',
   ACCOUNTS = 'accounts',
   ONBOARDING = 'onboarding',
+  MONTHLY_FLOWS = 'monthly-flows',
 }
 
 export default RouteName

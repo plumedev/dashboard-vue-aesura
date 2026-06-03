@@ -106,6 +106,16 @@ const routes: RouteRecordRaw[] = [
       icon: 'i-lucide-wallet',
     },
   },
+  {
+    path: '/monthly-flows',
+    name: RouteName.MONTHLY_FLOWS,
+    component: () => import('../pages/monthlyFlows.vue'),
+    meta: {
+      title: 'Flux mensuels',
+      requiresAuth: true,
+      icon: 'i-lucide-git-fork',
+    },
+  },
 ]
 
 const router = createRouter({
