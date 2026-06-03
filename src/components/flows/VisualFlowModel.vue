@@ -69,8 +69,19 @@
           <div class="mt-2 text-xl font-bold text-highlighted font-mono">
             {{ formatMoney(transit.amount) }}
           </div>
-          <div class="text-[10px] text-muted font-mono mt-1">
-            Reçu & dispatché
+          <div class="flex flex-col gap-0.5 text-[10px] text-muted font-mono mt-2 pt-2 border-t border-default/50">
+            <div class="flex justify-between">
+              <span>Total reçu :</span>
+              <span class="text-highlighted font-medium">{{ formatMoney(transit.amount) }}</span>
+            </div>
+            <div v-if="transit.dispatched > 0" class="flex justify-between">
+              <span>Dispatché :</span>
+              <span class="text-highlighted/80">{{ formatMoney(transit.dispatched) }}</span>
+            </div>
+            <div v-if="transit.remaining > 0" class="flex justify-between font-bold text-success" style="color: #00A36C;">
+              <span>Reste sur le compte :</span>
+              <span>{{ formatMoney(transit.remaining) }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -152,10 +163,18 @@ const computedFlowData = computed(() => {
   const transitsMap = new Map<string, { id: string; name: string; amount: number }>()
   const destinations: { id: string; name: string; amount: number; transitName?: string; ruleName: string }[] = []
 
+  // 1. Identify which accounts act as transit accounts
+  const transitAccounts = new Set<string>()
+  props.steps.forEach((step: any) => {
+    if (step.transitName) {
+      transitAccounts.add(step.transitName)
+    }
+  })
+
   props.steps.forEach((step, index) => {
     const amount = Number(step.amount || 0)
     
-    // 1. Source aggregation
+    // Source aggregation
     const sourceName = step.sourceName || 'Source inconnue'
     if (sourcesMap.has(sourceName)) {
       sourcesMap.get(sourceName)!.amount += amount
@@ -163,30 +182,66 @@ const computedFlowData = computed(() => {
       sourcesMap.set(sourceName, { id: `src-${index}`, name: sourceName, amount })
     }
 
-    // 2. Transit aggregation
+    // Transit & Destination aggregation
     if (step.transitName) {
+      // Case A: Step goes through a transit account to a destination
       const transitName = step.transitName
       if (transitsMap.has(transitName)) {
         transitsMap.get(transitName)!.amount += amount
       } else {
         transitsMap.set(transitName, { id: `trans-${index}`, name: transitName, amount })
       }
-    }
 
-    // 3. Destination list
-    const destName = step.destName || 'Destination inconnue'
-    destinations.push({
-      id: `dest-${index}`,
-      name: destName,
-      amount,
-      transitName: step.transitName || undefined,
-      ruleName: step.name
-    })
+      const destName = step.destName || 'Destination inconnue'
+      destinations.push({
+        id: `dest-${index}`,
+        name: destName,
+        amount,
+        transitName: transitName,
+        ruleName: step.name
+      })
+    } else if (transitAccounts.has(step.destName)) {
+      // Case B: Step is a direct funding to a transit account (no transitName, but destination is a transit account)
+      const transitName = step.destName
+      if (transitsMap.has(transitName)) {
+        transitsMap.get(transitName)!.amount += amount
+      } else {
+        transitsMap.set(transitName, { id: `trans-${index}`, name: transitName, amount })
+      }
+    } else {
+      // Case C: Direct transfer to a non-transit destination account
+      const destName = step.destName || 'Destination inconnue'
+      destinations.push({
+        id: `dest-${index}`,
+        name: destName,
+        amount,
+        transitName: undefined,
+        ruleName: step.name
+      })
+    }
+  })
+
+  // 3. Calculate dispatched and remaining amounts for transits
+  const transitDispatchedMap = new Map<string, number>()
+  destinations.forEach((dest) => {
+    if (dest.transitName) {
+      transitDispatchedMap.set(dest.transitName, (transitDispatchedMap.get(dest.transitName) || 0) + dest.amount)
+    }
+  })
+
+  const transitsList = Array.from(transitsMap.values()).map(transit => {
+    const dispatched = transitDispatchedMap.get(transit.name) || 0
+    const remaining = Math.max(0, transit.amount - dispatched)
+    return {
+      ...transit,
+      dispatched,
+      remaining
+    }
   })
 
   return {
     sources: Array.from(sourcesMap.values()),
-    transits: Array.from(transitsMap.values()),
+    transits: transitsList,
     destinations: destinations.sort((a, b) => (b.transitName ? 1 : 0) - (a.transitName ? 1 : 0))
   }
 })
