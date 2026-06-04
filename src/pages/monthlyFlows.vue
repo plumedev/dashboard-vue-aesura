@@ -22,9 +22,11 @@
     <template #body>
       <div class="p-6 space-y-6 overflow-auto h-full min-h-0 font-sans">
         
-        <!-- Top bar: Date Selector & Income Entry -->
+        <!-- Top bar: Date Selector & Income Autocomplete Selection -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <UCard class="lg:col-span-1 border border-default bg-elevated/40">
+          
+          <!-- Column 1: Period Selection & Action/Progress -->
+          <UCard class="lg:col-span-1 border border-default bg-elevated/40 flex flex-col justify-between">
             <div class="space-y-4">
               <div class="text-xs font-bold text-muted font-mono uppercase tracking-widest">
                 Période de planification
@@ -47,36 +49,11 @@
                 />
               </div>
             </div>
-          </UCard>
 
-          <UCard class="lg:col-span-2 border border-default bg-elevated/40">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div class="flex-1 space-y-2">
-                <label class="text-xs font-bold text-muted font-mono uppercase tracking-widest">
-                  Salaire / Revenus reçus ce mois (€)
-                </label>
-                <div class="flex gap-2">
-                  <UInput 
-                    v-model="monthlyIncome" 
-                    type="number" 
-                    step="0.01" 
-                    icon="i-lucide-euro" 
-                    placeholder="Ex: 2500.00" 
-                    class="flex-1 font-mono font-bold" 
-                  />
-                  <UButton 
-                    label="Générer / Calculer" 
-                    color="primary" 
-                    icon="i-lucide-play" 
-                    :loading="isCalculating"
-                    @click="generateChecklist" 
-                  />
-                </div>
-              </div>
-
-              <!-- General Progress -->
-              <div v-if="currentChecklist" class="w-full md:w-48 space-y-2">
-                <div class="flex justify-between text-xs font-mono">
+            <!-- Action Button & Progress -->
+            <div v-if="currentChecklist" class="mt-4 pt-4 border-t border-default/30 space-y-4">
+              <div>
+                <div class="flex justify-between text-xs font-mono mb-1">
                   <span class="text-muted">Progression</span>
                   <span class="text-highlighted font-bold">{{ progressPercentage }}%</span>
                 </div>
@@ -88,8 +65,62 @@
                   ></div>
                 </div>
               </div>
+              
+              <UButton 
+                label="Recalculer le plan" 
+                color="primary" 
+                icon="i-lucide-play" 
+                :loading="isCalculating"
+                :disabled="computedIncome <= 0"
+                class="w-full justify-center text-xs animate-none"
+                @click="() => generateChecklist(false)" 
+              />
             </div>
           </UCard>
+
+          <!-- Column 2 & 3: Incomes selection -->
+          <UCard class="lg:col-span-2 border border-default bg-elevated/40">
+            <div class="flex flex-col justify-between h-full gap-4">
+              <div class="space-y-3">
+                <div class="text-xs font-bold text-muted font-mono uppercase tracking-widest flex items-center justify-between">
+                  <span>Revenus de planification</span>
+                  <span class="text-highlighted font-mono text-sm font-bold">Total : {{ formatMoney(computedIncome) }}</span>
+                </div>
+                
+                <USelectMenu
+                  v-model="selectedIncomeObjects"
+                  :items="incomeOptions"
+                  multiple
+                  searchable
+                  placeholder="Sélectionner les revenus à inclure..."
+                  class="w-full font-mono font-bold"
+                  icon="i-lucide-wallet"
+                />
+              </div>
+
+              <!-- Selected incomes badges list -->
+              <div class="flex flex-wrap gap-1.5 max-h-16 overflow-y-auto">
+                <UBadge 
+                  v-for="item in selectedIncomeObjects" 
+                  :key="item.value" 
+                  variant="subtle" 
+                  color="neutral" 
+                  class="font-mono text-[10px] py-0.5 px-2 flex items-center gap-1"
+                >
+                  <span>{{ item.label }}</span>
+                  <UIcon 
+                    name="i-lucide-x" 
+                    class="w-3 h-3 cursor-pointer text-muted hover:text-error transition" 
+                    @click.stop="toggleIncomeSelection(item.value, false)" 
+                  />
+                </UBadge>
+                <div v-if="selectedIncomeObjects.length === 0" class="text-[10px] text-muted italic font-mono">
+                  Aucun revenu sélectionné pour la planification.
+                </div>
+              </div>
+            </div>
+          </UCard>
+
         </div>
 
         <!-- Visual Flow Model -->
@@ -176,8 +207,17 @@
               </h3>
             </div>
 
-            <div v-if="!currentChecklist" class="text-center py-12 text-muted font-mono text-xs border border-dashed border-default rounded-lg">
-              Saisissez un salaire/revenu ci-dessus et cliquez sur "Générer / Calculer" pour obtenir votre plan.
+            <div v-if="!currentChecklist" class="text-center py-12 text-muted font-mono text-xs border border-dashed border-default rounded-lg flex flex-col items-center justify-center gap-3">
+              <UIcon name="i-lucide-git-fork" class="w-8 h-8 text-muted/50" />
+              <span>Aucun plan d'action généré pour ce mois. Sélectionnez vos revenus et dépenses récurrents ci-dessus, puis cliquez sur "Générer le plan".</span>
+              <UButton 
+                label="Générer le plan de ce mois" 
+                color="primary" 
+                icon="i-lucide-play" 
+                :loading="isCalculating"
+                :disabled="computedIncome <= 0"
+                @click="() => generateChecklist(false)" 
+              />
             </div>
 
             <div v-else class="space-y-6">
@@ -197,10 +237,10 @@
                     <div class="flex items-start justify-between gap-4">
                       <div class="flex items-start gap-3">
                         <UCheckbox 
-                          v-model="step.completed" 
+                          :model-value="step.completed" 
                           class="mt-1" 
                           style="accent-color: #00A36C;"
-                          @change="saveStepState(step)" 
+                          @update:model-value="(val) => saveStepState(step, !!val)" 
                         />
                         <div>
                           <div class="font-bold text-sm" :class="{ 'line-through text-muted': step.completed }">
@@ -234,10 +274,10 @@
                     <div class="flex items-start justify-between gap-4">
                       <div class="flex items-start gap-3">
                         <UCheckbox 
-                          v-model="step.completed" 
+                          :model-value="step.completed" 
                           class="mt-1" 
                           style="accent-color: #00A36C;"
-                          @change="saveStepState(step)" 
+                          @update:model-value="(val) => saveStepState(step, !!val)" 
                         />
                         <div>
                           <div class="font-bold text-sm" :class="{ 'line-through text-muted': step.completed }">
@@ -271,10 +311,10 @@
                     <div class="flex items-start justify-between gap-4">
                       <div class="flex items-start gap-3">
                         <UCheckbox 
-                          v-model="step.completed" 
+                          :model-value="step.completed" 
                           class="mt-1" 
                           style="accent-color: #00A36C;"
-                          @change="saveStepState(step)" 
+                          @update:model-value="(val) => saveStepState(step, !!val)" 
                         />
                         <div>
                           <div class="font-bold text-sm" :class="{ 'line-through text-muted': step.completed }">
@@ -322,14 +362,68 @@ import type { DocumentData } from 'firebase/firestore'
 import TransferRulesModal from '@/components/flows/TransferRulesModal.vue'
 import VisualFlowModel from '@/components/flows/VisualFlowModel.vue'
 import { useSynthesisStore } from '@/stores/synthesisStore'
+import { toDate } from '@/helpers/dateHelpers'
 
 const currentMonthDate = ref(new Date())
-const monthlyIncome = ref<number | null>(null)
 const isCalculating = ref(false)
+
+const selectedIncomeIds = ref<string[]>([])
 
 const rules = ref<DocumentData[]>([])
 const accounts = ref<DocumentData[]>([])
 const currentChecklist = ref<any>(null)
+
+const recurringIncomes = computed(() => {
+  return synthesisStore.recurringTransactions.filter(t => t.type === 'income')
+})
+
+const computedIncome = computed(() => {
+  let total = 0
+  recurringIncomes.value.forEach(tx => {
+    if (selectedIncomeIds.value.includes(tx.id)) {
+      total += getIterationOrBaseAmount(tx, currentMonthDate.value)
+    }
+  })
+  return total
+})
+
+const incomeOptions = computed(() => {
+  return recurringIncomes.value.map(tx => ({
+    label: `${tx.name} (${formatMoney(getIterationOrBaseAmount(tx, currentMonthDate.value))})`,
+    value: tx.id
+  }))
+})
+
+const selectedIncomeObjects = computed({
+  get() {
+    return recurringIncomes.value
+      .filter(tx => selectedIncomeIds.value.includes(tx.id))
+      .map(tx => ({
+        label: `${tx.name} (${formatMoney(getIterationOrBaseAmount(tx, currentMonthDate.value))})`,
+        value: tx.id
+      }))
+  },
+  set(val: any[]) {
+    selectedIncomeIds.value = val.map(item => typeof item === 'object' && item !== null ? item.value : item)
+    if (currentChecklist.value) {
+      generateChecklist(true)
+    }
+  }
+})
+
+const toggleIncomeSelection = async (id: string, selected: boolean) => {
+  if (selected) {
+    if (!selectedIncomeIds.value.includes(id)) {
+      selectedIncomeIds.value.push(id)
+    }
+  } else {
+    selectedIncomeIds.value = selectedIncomeIds.value.filter(x => x !== id)
+  }
+  
+  if (currentChecklist.value) {
+    await generateChecklist(true)
+  }
+}
 
 const selectedRule = ref<DocumentData | null>(null)
 const rulesModal = ref<InstanceType<typeof TransferRulesModal> | null>(null)
@@ -396,28 +490,44 @@ const fetchAccountsAndRules = async () => {
   }
 }
 
-const fetchChecklist = async () => {
+const fetchChecklist = async (autoRecalculate = true) => {
   const result = await getChecklists({
     collectionName: 'monthlyChecklists',
     queryConstraints: [] // Automatically filtered by userId
   })
   
-  if (result && Array.isArray(result)) {
-    const matching = result.find(c => c.month === currentMonthKey.value)
-    if (matching) {
-      currentChecklist.value = matching
-      monthlyIncome.value = matching.salary
-    } else {
-      currentChecklist.value = null
-      monthlyIncome.value = null
+  const matching = (result && Array.isArray(result))
+    ? result.find(c => c.month === currentMonthKey.value)
+    : null
+
+  if (matching) {
+    currentChecklist.value = matching
+    
+    // Incomes default setup (prefer transactions containing "salaire")
+    const defaultIncomes = recurringIncomes.value.filter(t => t.name.toLowerCase().includes('salaire'))
+    const defaultIncomeIds = defaultIncomes.length > 0 ? defaultIncomes.map(t => t.id) : recurringIncomes.value.map(t => t.id)
+    
+    selectedIncomeIds.value = matching.selectedIncomeIds || defaultIncomeIds
+
+    // If autoRecalculate is true, and the stored checklist salary doesn't match the current computed income
+    // we recalculate to keep it updated with the correct iteration amount for the month.
+    if (autoRecalculate && matching.salary !== computedIncome.value) {
+      await generateChecklist(true)
     }
+  } else {
+    currentChecklist.value = null
+    
+    const defaultIncomes = recurringIncomes.value.filter(t => t.name.toLowerCase().includes('salaire'))
+    const defaultIncomeIds = defaultIncomes.length > 0 ? defaultIncomes.map(t => t.id) : recurringIncomes.value.map(t => t.id)
+    
+    selectedIncomeIds.value = defaultIncomeIds
   }
 }
 
 const refreshRulesAndChecklist = async () => {
   await fetchAccountsAndRules()
-  await fetchChecklist()
   await synthesisStore.getRecurringTransactions()
+  await fetchChecklist()
   if (currentChecklist.value) {
     await generateChecklist(true)
   }
@@ -458,7 +568,7 @@ const getIterationOrBaseAmount = (tx: any, monthDate: Date): number => {
     
     const matchingIt = tx.iterations.find((it: any) => {
       if (!it.date) return false
-      const itDate = it.date.toDate ? it.date.toDate() : new Date(it.date)
+      const itDate = toDate(it.date)
       return isWithinInterval(itDate, { start: monthStart, end: monthEnd }) && it.active !== false
     })
     
@@ -502,19 +612,23 @@ const getRecurringRuleDetailsLabel = (rule: any) => {
 
 // Algorithm to generate steps based on transfer rules and monthly income input
 const generateChecklist = async (preserveCompleted = false) => {
-  if (!monthlyIncome.value || monthlyIncome.value <= 0) return
+  const salary = computedIncome.value
+  if (salary <= 0) return
   isCalculating.value = true
 
   try {
-    const salary = Number(monthlyIncome.value)
     const steps: any[] = []
 
     // Capture old completed states if we want to preserve them
     const completedRuleIds = new Set<string>()
+    const completedTransitRuleIds = new Set<string>()
     if (preserveCompleted && currentChecklist.value && currentChecklist.value.steps) {
       currentChecklist.value.steps.forEach((s: any) => {
         if (s.completed && s.ruleId) {
           completedRuleIds.add(s.ruleId)
+        }
+        if (s.transitCompleted && s.ruleId) {
+          completedTransitRuleIds.add(s.ruleId)
         }
       })
     }
@@ -563,6 +677,7 @@ const generateChecklist = async (preserveCompleted = false) => {
         destAccountId: rule.destAccountId,
         amount,
         completed: preserveCompleted ? completedRuleIds.has(rule.id) : false,
+        transitCompleted: preserveCompleted ? completedTransitRuleIds.has(rule.id) : false,
         amountType: rule.amountType
       })
     })
@@ -574,6 +689,7 @@ const generateChecklist = async (preserveCompleted = false) => {
         documentId: currentChecklist.value.id,
         data: {
           salary,
+          selectedIncomeIds: selectedIncomeIds.value,
           steps
         }
       })
@@ -584,12 +700,13 @@ const generateChecklist = async (preserveCompleted = false) => {
         data: {
           month: currentMonthKey.value,
           salary,
+          selectedIncomeIds: selectedIncomeIds.value,
           steps
         }
       })
     }
 
-    await fetchChecklist()
+    await fetchChecklist(false)
   } catch (error) {
     console.error('Error generating checklist:', error)
   } finally {
@@ -597,7 +714,7 @@ const generateChecklist = async (preserveCompleted = false) => {
   }
 }
 
-const saveStepState = async (step: any) => {
+const saveStepState = async (step: any, completed: boolean) => {
   if (!currentChecklist.value) return
   
   try {
@@ -605,7 +722,7 @@ const saveStepState = async (step: any) => {
     if (step.id && step.id.startsWith('grouped-transit-')) {
       currentChecklist.value.steps.forEach((s: any) => {
         if (s.sourceName === step.sourceName && (s.transitName === step.transitName || (!s.transitName && s.destName === step.transitName))) {
-          s.completed = step.completed
+          s.transitCompleted = completed
         }
       })
     }
@@ -613,7 +730,7 @@ const saveStepState = async (step: any) => {
     else if (step.id && step.id.startsWith('grouped-dispatch-')) {
       currentChecklist.value.steps.forEach((s: any) => {
         if (s.transitName === step.transitName && s.destName === step.destName) {
-          s.completed = step.completed
+          s.completed = completed
         }
       })
     }
@@ -621,7 +738,7 @@ const saveStepState = async (step: any) => {
     else if (step.id && step.id.startsWith('grouped-direct-')) {
       currentChecklist.value.steps.forEach((s: any) => {
         if (s.sourceName === step.sourceName && s.destName === step.destName) {
-          s.completed = step.completed
+          s.completed = completed
         }
       })
     }
@@ -670,7 +787,7 @@ const groupedSteps = computed(() => {
         if (!item.aggregatedRuleNames.includes(step.name)) {
           item.aggregatedRuleNames.push(step.name)
         }
-        if (!step.completed) {
+        if (!step.transitCompleted) {
           item.completed = false
         }
       } else {
@@ -679,7 +796,7 @@ const groupedSteps = computed(() => {
           sourceName: step.sourceName,
           transitName: transitName,
           amount: step.amount,
-          completed: step.completed,
+          completed: !!step.transitCompleted,
           aggregatedRuleNames: [step.name]
         })
       }
@@ -737,7 +854,7 @@ const groupedSteps = computed(() => {
 
 onMounted(async () => {
   await fetchAccountsAndRules()
-  await fetchChecklist()
   await synthesisStore.getRecurringTransactions()
+  await fetchChecklist()
 })
 </script>
